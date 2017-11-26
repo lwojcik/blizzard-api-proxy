@@ -41,24 +41,6 @@ config.database.url                     = env.SG_API_MONGODB_DB_URL;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-config.twitch = {};
-
-config.twitch.api = {};
-config.twitch.api.protocol              = 'https';
-config.twitch.api.url                   = 'api.twitch.tv';
-config.twitch.api.path                  = '/kraken';
-config.twitch.api.port                  = 443;
-config.twitch.api.followerParams        = '/follows?direction=DESC&offset=0';
-config.twitch.api.clientId              = env.SG_API_TWITCH_CLIENT_ID;
-
-config.twitch.hostApi = {};
-config.twitch.hostApi.protocol          = 'http';
-config.twitch.hostApi.url               = 'tmi.twitch.tv';
-config.twitch.hostApi.path              = '/hosts?include_logins=1';
-config.twitch.hostApi.clientId          = env.SG_API_TWITCH_CLIENT_ID;
-
-////////////////////////////////////////////////////////////////////////////////
-
 config.battlenet = {};
 
 config.battlenet.api = {};
