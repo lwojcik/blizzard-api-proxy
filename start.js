@@ -1,12 +1,14 @@
 'use strict';
 
+require('dotenv').config();
+
 const cluster = require('cluster');
 const stopSignals = [
   'SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL', 'SIGTRAP', 'SIGABRT',
   'SIGBUS', 'SIGFPE', 'SIGUSR1', 'SIGSEGV', 'SIGUSR2', 'SIGTERM'
 ];
 
-const production = process.env.NODE_ENV == 'production';
+const production = process.env.NODE_ENV || 'production';
 
 let stopping = false;
 
@@ -21,7 +23,7 @@ cluster.on('disconnect', function(worker) {
 });
 
 if (cluster.isMaster) {
-  const workerCount = process.env.NODE_CLUSTER_WORKERS || 4;
+  const workerCount = process.env.NODE_CLUSTER_WORKERS || 1;
   //console.log(`Starting ${workerCount} workers...`);
   for (let i = 0; i < workerCount; i++) {
     cluster.fork();

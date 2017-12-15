@@ -8,16 +8,15 @@ const compression = require('compression');
 const helmet      = require('helmet');
 const mongoose    = require('mongoose');
 
-const config      = require('./config').app;
-const cache       = require('./config').cache;
-const database    = require('./config').database;
-const battlenet   = require('./config').battlenet;
-const ssl         = require('./config').ssl;
+const config      = require('./config/app');
+const cache       = require('./config/cache');
+const database    = require('./config/database');
+const ssl         = require('./config/ssl');
 
 const apicache    = require('apicache').options({ debug: cache.debug }).middleware;
 
-const bnetId      = battlenet.api.key;
-const bnetSecret  = battlenet.api.secret;
+// const bnetId      = battlenet.api.key;
+// const bnetSecret  = battlenet.api.secret;
  
 const app = express();
 
@@ -39,14 +38,14 @@ require('./routes')(app);
 
 // removing trailing slashes
 
-app.use(function(req, res, next) {
-  if (req.path.substr(-1) == '/' && req.path.length > 1) {
-    let query = req.url.slice(req.path.length);
-    res.redirect(301, req.path.slice(0, -1) + query);
-  } else {
-    next();
-  }
-});
+// app.use(function(req, res, next) {
+//   if (req.path.substr(-1) == '/' && req.path.length > 1) {
+//     let query = req.url.slice(req.path.length);
+//     res.redirect(301, req.path.slice(0, -1) + query);
+//   } else {
+//     next();
+//   }
+// });
 
 const options = {
   key  : fs.readFileSync(ssl.key),
