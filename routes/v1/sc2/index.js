@@ -4,9 +4,9 @@ const cache    = require('../../../config/cache');
 const apicache = require('apicache').options({ debug: cache.debug }).middleware;
 
 router.get('/', apicache(cache.static), function(req, res) {
-  res.json(
-    'TODO'
-  );   
+  res.json({
+    'starcraft2_profile': config.siteUrl + '/v1/sc2/profile'
+  });   
 });
 
 module.exports = router;

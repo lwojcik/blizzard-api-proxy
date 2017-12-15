@@ -38,14 +38,14 @@ require('./routes')(app);
 
 // removing trailing slashes
 
-app.use(function(req, res, next) {
-  if (req.path.substr(-1) == '/' && req.path.length > 1) {
-    let query = req.url.slice(req.path.length);
-    res.redirect(301, req.path.slice(0, -1) + query);
-  } else {
-    next();
-  }
-});
+// app.use(function(req, res, next) {
+//   if (req.path.substr(-1) == '/' && req.path.length > 1) {
+//     let query = req.url.slice(req.path.length);
+//     res.redirect(301, req.path.slice(0, -1) + query);
+//   } else {
+//     next();
+//   }
+// });
 
 const options = {
   key  : fs.readFileSync(ssl.key),
