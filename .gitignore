@@ -38,6 +38,8 @@ jspm_packages
 
 # SSL keys
 ssl/
+*.crt
+*.key
 
 # Environment variables
 .env
