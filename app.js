@@ -8,16 +8,15 @@ const compression = require('compression');
 const helmet      = require('helmet');
 const mongoose    = require('mongoose');
 
-const config      = require('./config').app;
-const cache       = require('./config').cache;
-const database    = require('./config').database;
-const battlenet   = require('./config').battlenet;
-const ssl         = require('./config').ssl;
+const config      = require('./config/app');
+const cache       = require('./config/cache');
+const database    = require('./config/database');
+const ssl         = require('./config/ssl');
 
 const apicache    = require('apicache').options({ debug: cache.debug }).middleware;
 
-const bnetId      = battlenet.api.key;
-const bnetSecret  = battlenet.api.secret;
+// const bnetId      = battlenet.api.key;
+// const bnetSecret  = battlenet.api.secret;
  
 const app = express();
 
@@ -35,7 +34,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // routes
 
-require('./routes')(app);
+require('./routes/routes')(app);
 
 // removing trailing slashes
 
