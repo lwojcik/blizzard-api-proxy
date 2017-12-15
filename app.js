@@ -34,7 +34,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 // routes
 
-require('./routes/routes')(app);
+require('./routes')(app);
 
 // removing trailing slashes
 
