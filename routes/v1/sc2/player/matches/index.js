@@ -7,13 +7,13 @@ const sc2api = require('../../../../../api/games/starcraft2');
 
 router.get('/', apicache(cache.static), function(req, res) {
   res.json({
-    'starcraft2_player_ladders': config.siteUrl + '/v1/sc2/player/ladders/:server/:profileId/:profileRegion/:profileName'
+    'starcraft2_player_matches': config.siteUrl + '/v1/sc2/player/matches/:server/:profileId/:profileRegion/:profileName'
   });
 });
 
 router.get('/:server/:profileId/:profileRegion/:profileName', apicache(cache.request), function(req, res) {
   const { server, profileId, profileRegion, profileName } = req.params;
-  sc2api.getPlayerLadders(server, profileId, profileRegion, profileName, res.json.bind(res));
+  sc2api.getPlayerMatches(server, profileId, profileRegion, profileName, res.json.bind(res));
 });
 
 router.get('/*', apicache(cache.static), function(req, res) {

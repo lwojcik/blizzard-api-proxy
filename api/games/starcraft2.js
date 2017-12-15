@@ -31,7 +31,12 @@ const getPlayerLadders = (server, profileId, profileRegion, profileName, callbac
   getSc2PlayerData('ladders', server, profileId, profileRegion, profileName, callback);
 }
 
+const getPlayerMatches = (server, profileId, profileRegion, profileName, callback) => {
+  getSc2PlayerData('matches', server, profileId, profileRegion, profileName, callback);
+}
+
 module.exports = {
   getPlayerProfile,
-  getPlayerLadders
+  getPlayerLadders,
+  getPlayerMatches
 };
