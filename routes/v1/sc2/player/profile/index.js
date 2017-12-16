@@ -3,7 +3,7 @@ const config = require('../../../../../config/app');
 const cache = require('../../../../../config/cache');
 const apicache = require('apicache').options({ debug: cache.debug }).middleware;
 
-const sc2api = require('../../../../../api/games/starcraft2');
+const sc2playerApi = require('../../../../../api/starcraft2/player');
 
 router.get('/', apicache(cache.static), (req, res) => {
   res.json({
@@ -16,7 +16,7 @@ router.get('/:server/:profileId/:profileRegion/:profileName', apicache(cache.req
     server, profileId, profileRegion, profileName,
   } = req.params;
 
-  sc2api.getPlayerProfile(server, profileId, profileRegion, profileName, res.json.bind(res));
+  sc2playerApi.getPlayerProfile(server, profileId, profileRegion, profileName, res.json.bind(res));
 });
 
 router.get('/*', apicache(cache.static), (req, res) => {
