@@ -1,5 +1,6 @@
 {
   "name": "blizzard-api-proxy",
+  "version": "0.1",
   "main": "start.js",
   "scripts": {
     "start": "node --use_strict start.js"
@@ -20,6 +21,7 @@
     "eslint": "^4.13.1",
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "3.5.0",
     "gulp": "^3.9.1",
     "gulp-eslint": "^4.0.0",

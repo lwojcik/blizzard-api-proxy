@@ -1,21 +1,12 @@
-'use strict';
-
 const https = require('https');
-const bnetConfig = require('../config').battlenet;
-const sc2config = require('../config').sc2;
+const bnetConfig = require('../config/api/battlenet');
 
 const query = (requestServer, requestPath, callback) => {
-  console.log(requestServer);
-  console.log(requestPath);
-  console.log(callback);
-
   const requestOptions = {
     hostname: requestServer,
     port: bnetConfig.api.port,
-    path: requestPath
+    path: requestPath,
   };
-
-  console.log(requestOptions);
 
   const requestCallback = (response) => {
     let stringResponse = '';
@@ -35,14 +26,14 @@ const query = (requestServer, requestPath, callback) => {
   };
 
   const request = https.get(requestOptions, requestCallback);
-  
+
   request.on('error', (err) => {
-    return err;
+    callback(err);
   });
-  
+
   request.end();
-}
+};
 
 module.exports = {
-  query
+  query,
 };

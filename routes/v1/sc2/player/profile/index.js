@@ -5,20 +5,23 @@ const apicache = require('apicache').options({ debug: cache.debug }).middleware;
 
 const sc2api = require('../../../../../api/games/starcraft2');
 
-router.get('/', apicache(cache.static), function(req, res) {
+router.get('/', apicache(cache.static), (req, res) => {
   res.json({
-    'starcraft2_player_profile': config.siteUrl + '/v1/sc2/player/profile/:server/:profileId/:profileRegion/:profileName'
+    starcraft2_player_profile: `${config.siteUrl}/v1/sc2/player/profile/:server/:profileId/:profileRegion/:profileName`,
   });
 });
 
-router.get('/:server/:profileId/:profileRegion/:profileName', apicache(cache.request), function(req, res) {
-  const { server, profileId, profileRegion, profileName } = req.params;
+router.get('/:server/:profileId/:profileRegion/:profileName', apicache(cache.request), (req, res) => {
+  const {
+    server, profileId, profileRegion, profileName,
+  } = req.params;
+
   sc2api.getPlayerProfile(server, profileId, profileRegion, profileName, res.json.bind(res));
 });
 
-router.get('/*', apicache(cache.static), function(req, res) {
+router.get('/*', apicache(cache.static), (req, res) => {
   res.json({
-    'error': 'Wrong or missing request parameters (server, profileId, profileRegion, profileName)'
+    error: 'Wrong or missing request parameters (server, profileId, profileRegion, profileName)',
   });
 });
 
