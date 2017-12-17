@@ -1,3 +1,10 @@
+/**
+ * @fileOverview Route enumeration file.
+ * @author       Łukasz Wójcik
+ * @license      MIT
+ * @since        2017-12-17
+ */
+
 /* eslint-disable global-require */
 module.exports = (app) => {
   app.use('/', require('./routes/index'));
