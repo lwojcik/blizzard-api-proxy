@@ -1,9 +1,9 @@
 const https = require('https');
 const bnetConfig = require('../config/api/battlenet');
 
-const query = (requestServer, requestPath, callback) => {
+const fetchDataFromBnet = (requestUri, requestPath, callback) => {
   const requestOptions = {
-    hostname: requestServer,
+    hostname: requestUri,
     port: bnetConfig.api.port,
     path: requestPath,
   };
@@ -34,6 +34,33 @@ const query = (requestServer, requestPath, callback) => {
   request.end();
 };
 
+const queryWithApiKey = (server, requestPath, callback) => {
+  const requestUri = bnetConfig.api.url[server];
+  const requestPathWithApiKey = `${requestPath}?apikey=${bnetConfig.api.key}`;
+
+  fetchDataFromBnet(requestUri, requestPathWithApiKey, (returnedData) => {
+    callback(returnedData);
+  });
+};
+
+const queryWithAccessToken = (server, requestPath, callback) => {
+  const clientId = bnetConfig.api.key;
+  const clientSecret = bnetConfig.api.secret;
+  const accessTokenRequestServer = bnetConfig.getAccessTokenUri[server];
+  const accessTokenApiPath = `/oauth/token?grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`;
+
+  fetchDataFromBnet(accessTokenRequestServer, accessTokenApiPath, (returnedData) => {
+    const accessToken = returnedData.access_token;
+    const authenticatedRequestUri = bnetConfig.api.url[server];
+    const authenticatedRequestPath = `${requestPath}?access_token=${accessToken}`;
+
+    fetchDataFromBnet(authenticatedRequestUri, authenticatedRequestPath, (authenticatedData) => {
+      callback(authenticatedData);
+    });
+  });
+};
+
 module.exports = {
-  query,
+  queryWithApiKey,
+  queryWithAccessToken,
 };

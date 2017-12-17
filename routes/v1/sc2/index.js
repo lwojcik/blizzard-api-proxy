@@ -7,6 +7,7 @@ router.get('/', apicache(cache.static), (req, res) => {
   res.json({
     starcraft2_player_api: `${config.siteUrl}/v1/sc2/player`,
     starcraft2_ladder_api: `${config.siteUrl}/v1/sc2/ladder`,
+    starcraft2_authenticated_ladder_api: `${config.siteUrl}/v1/sc2/ladder2`,
   });
 });
 

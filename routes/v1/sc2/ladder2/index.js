@@ -11,12 +11,12 @@ router.get('/', apicache(cache.static), (req, res) => {
   });
 });
 
-router.get('/:server/:ladderId', apicache(cache.static), (req, res) => {
+router.get('/:server/:ladderId', apicache(cache.expensiveRequest), (req, res) => {
   const {
     server, ladderId,
   } = req.params;
 
-  sc2ladderApi.getLadderData(server, ladderId, res.json.bind(res));
+  sc2ladderApi.getAuthenticatedLadderData(server, ladderId, res.json.bind(res));
 });
 
 router.get('/*', apicache(cache.static), (req, res) => {

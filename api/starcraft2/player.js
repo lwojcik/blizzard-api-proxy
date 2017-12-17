@@ -9,12 +9,9 @@ const getSc2PlayerData = (resource, server, profileId, profileRegion, profileNam
     });
   }
 
-  const requestServer = bnetConfig.api.url[server];
   const requestedResource = (resource === 'profile') ? '' : resource;
-
-  const requestPath = `/sc2/profile/${profileId}/${profileRegion}/${profileName}/${requestedResource}?apikey=${bnetConfig.api.key}`;
-
-  bnetApi.query(requestServer, requestPath, callback);
+  const requestPath = `/sc2/profile/${profileId}/${profileRegion}/${profileName}/${requestedResource}`;
+  bnetApi.queryWithApiKey(server, requestPath, callback);
 };
 
 const getPlayerProfile = (server, profileId, profileRegion, profileName, callback) => {
