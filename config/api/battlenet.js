@@ -23,7 +23,14 @@ bnetApiConfig.api.secret = env.API_BATTLENET_SECRET;
 
 bnetApiConfig.checkAccessTokenUri = 'battle.net/oauth/check_token?token=';
 bnetApiConfig.checkAccessUriCn = 'https://battlenet.com.cn/oauth/check_token?token=';
-bnetApiConfig.getAccessTokenUri = 'battle.net/oauth/token';
-bnetApiConfig.getAccessTokenUriCn = 'https://www.battlenet.com.cn/oauth/token';
+
+bnetApiConfig.getAccessTokenUri = {};
+bnetApiConfig.getAccessTokenUri.eu = 'eu.battle.net';
+bnetApiConfig.getAccessTokenUri.kr = 'kr.battle.net';
+bnetApiConfig.getAccessTokenUri.sea = 'sea.battle.net';
+bnetApiConfig.getAccessTokenUri.tw = 'tw.battle.net';
+bnetApiConfig.getAccessTokenUri.us = 'us.battle.net';
+
+bnetApiConfig.getAccessTokenUriCn = 'https://www.battlenet.com.cn';
 
 module.exports = bnetApiConfig;

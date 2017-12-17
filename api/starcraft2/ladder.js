@@ -9,12 +9,22 @@ const getLadderData = (server, ladderId, callback) => {
     });
   }
 
-  const requestServer = bnetConfig.api.url[server];
-  const requestPath = `/sc2/ladder/${ladderId}?apikey=${bnetConfig.api.key}`;
+  const requestPath = `/sc2/ladder/${ladderId}`;
+  bnetApi.queryWithApiKey(server, requestPath, callback);
+};
 
-  bnetApi.query(requestServer, requestPath, callback);
+const getAuthenticatedLadderData = (server, ladderId, callback) => {
+  if (!bnetConfig.servers.includes(server)) {
+    callback({
+      error: `Wrong server (you provided: ${server}, available choices: ${bnetConfig.servers.join(', ')})`,
+    });
+  }
+
+  const requestPath = `/data/sc2/ladder/${ladderId}`;
+  bnetApi.queryWithAccessToken(server, requestPath, callback);
 };
 
 module.exports = {
   getLadderData,
+  getAuthenticatedLadderData,
 };
