@@ -1,3 +1,10 @@
+/**
+ * @fileOverview Application gulp tasks.
+ * @author       Łukasz Wójcik
+ * @license      MIT
+ * @since        2017-12-17
+ */
+
 const gulp = require('gulp');
 const shell = require('gulp-shell');
 const eslint = require('gulp-eslint');

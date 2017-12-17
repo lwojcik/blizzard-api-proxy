@@ -1,3 +1,11 @@
+/**
+ * @fileOverview Battle.net access token model
+ * @constructor  BnetAccessToken
+ * @author       Łukasz Wójcik
+ * @license      MIT
+ * @since        2017-12-17
+ */
+
 const mongoose = require('mongoose');
 
 const bnetAccessTokenSchema = mongoose.Schema({
@@ -7,4 +15,4 @@ const bnetAccessTokenSchema = mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('bnetAccessToken', bnetAccessTokenSchema);
+module.exports = mongoose.model('BnetAccessToken', bnetAccessTokenSchema);

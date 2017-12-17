@@ -1,6 +1,20 @@
+/**
+ * @fileOverview Battle.net authentication and data retrieval functions.
+ * @author       Łukasz Wójcik
+ * @license      MIT
+ * @since        2017-12-17
+ */
+
 const https = require('https');
 const bnetConfig = require('../config/api/battlenet');
 
+/**
+ * General method for fetching data from selected path of Battle.net endpoint.
+ * @function
+ * @param {string} requestUri - URL of the request server.
+ * @param {string} requestPath - Path to request from.
+ * @param {function} callback - Callback function to pass the data to.
+ */
 const fetchDataFromBnet = (requestUri, requestPath, callback) => {
   const requestOptions = {
     hostname: requestUri,
@@ -34,6 +48,13 @@ const fetchDataFromBnet = (requestUri, requestPath, callback) => {
   request.end();
 };
 
+/**
+ * Performs API key authentication and fetches data from protected Battle.net endpoints.
+ * @function
+ * @param {string} server - Server name abbreviation.
+ * @param {string} requestPath - Path to request from.
+ * @param {function} callback - Callback function to pass the data to.
+ */
 const queryWithApiKey = (server, requestPath, callback) => {
   const requestUri = bnetConfig.api.url[server];
   const requestPathWithApiKey = `${requestPath}?apikey=${bnetConfig.api.key}`;
@@ -43,6 +64,13 @@ const queryWithApiKey = (server, requestPath, callback) => {
   });
 };
 
+/**
+ * Performs access-key authentication and fetches data from protected Battle.net endpoints.
+ * @function
+ * @param {string} server - server name abbreviation.
+ * @param {string} requestPath - Path to request from.
+ * @param {function} callback - Callback function to pass the data to.
+ */
 const queryWithAccessToken = (server, requestPath, callback) => {
   const clientId = bnetConfig.api.key;
   const clientSecret = bnetConfig.api.secret;
