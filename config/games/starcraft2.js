@@ -1,9 +1,8 @@
 /**
- * @fileOverview StarCraft 2 configuration file.
- *
- * @author       Łukasz Wójcik
- * @license      MIT
- * @since        2017-12-17
+ * @file    StarCraft 2 configuration file.
+ * @author  Łukasz Wójcik
+ * @license MIT
+ * @since   2017-12-17
  */
 
 const sc2Config = {};

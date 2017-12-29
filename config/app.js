@@ -1,8 +1,8 @@
 /**
- * @fileOverview Application configuration file.
- * @author       Łukasz Wójcik
- * @license      MIT
- * @since        2017-12-17
+ * @file    App configuration file.
+ * @author  Łukasz Wójcik
+ * @license MIT
+ * @since   2017-12-17
  */
 
 const { env } = process;

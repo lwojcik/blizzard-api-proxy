@@ -1,8 +1,8 @@
 /**
- * @fileOverview Main route file.
- * @author       Łukasz Wójcik
- * @license      MIT
- * @since        2017-12-17
+ * @file    Main route file.
+ * @author  Łukasz Wójcik
+ * @license MIT
+ * @since   2017-12-17
  */
 
 const router = require('express').Router();

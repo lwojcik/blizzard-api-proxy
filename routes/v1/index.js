@@ -1,8 +1,8 @@
 /**
- * @fileOverview API version 1 route file.
- * @author       Łukasz Wójcik
- * @license      MIT
- * @since        2017-12-17
+ * @file    API version 1 route file.
+ * @author  Łukasz Wójcik
+ * @license MIT
+ * @since   2017-12-17
  */
 
 const router = require('express').Router();

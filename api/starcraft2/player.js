@@ -1,9 +1,9 @@
 /**
- * @fileOverview StarCraft 2 player data retrieval functions.
+ * @file    StarCraft 2 player data retrieval functions.
  *
- * @author       Łukasz Wójcik
- * @license      MIT
- * @since        2017-12-17
+ * @author  Łukasz Wójcik
+ * @license MIT
+ * @since   2017-12-17
  */
 
 const bnetConfig = require('../../config/api/battlenet');

@@ -1,9 +1,8 @@
 /**
- * @fileOverview Battle.net configuration file.
- *
- * @author       Łukasz Wójcik
- * @license      MIT
- * @since        2017-12-17
+ * @file    Battle.net configuration file.
+ * @author  Łukasz Wójcik
+ * @license MIT
+ * @since   2017-12-17
  */
 
 const { env } = process;
