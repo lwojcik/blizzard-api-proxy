@@ -1,8 +1,8 @@
 /**
- * @fileOverview Battle.net route file.
- * @author       Łukasz Wójcik
- * @license      MIT
- * @since        2017-12-17
+ * @file    Battle.net route file.
+ * @author  Łukasz Wójcik
+ * @license MIT
+ * @since   2017-12-17
  */
 
 const router = require('express').Router();

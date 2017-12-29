@@ -1,8 +1,8 @@
 /**
- * @fileOverview Battle.net authentication and data retrieval functions.
- * @author       Łukasz Wójcik
- * @license      MIT
- * @since        2017-12-17
+ * @file    Battle.net authentication and data retrieval functions.
+ * @author  Łukasz Wójcik
+ * @license MIT
+ * @since   2017-12-17
  */
 
 const https = require('https');

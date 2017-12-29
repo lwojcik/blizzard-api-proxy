@@ -1,9 +1,9 @@
 /**
- * @fileOverview Battle.net access token model
- * @constructor  BnetAccessToken
- * @author       Łukasz Wójcik
- * @license      MIT
- * @since        2017-12-17
+ * @file        Battle.net access token model
+ * @constructor BnetAccessToken
+ * @author      Łukasz Wójcik
+ * @license     MIT
+ * @since       2017-12-17
  */
 
 const mongoose = require('mongoose');

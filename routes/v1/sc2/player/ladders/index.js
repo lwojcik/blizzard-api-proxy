@@ -1,8 +1,8 @@
 /**
- * @fileOverview StarCraft 2 player ladders route file.
- * @author       Łukasz Wójcik
- * @license      MIT
- * @since        2017-12-17
+ * @file    StarCraft 2 player ladders route file.
+ * @author  Łukasz Wójcik
+ * @license MIT
+ * @since   2017-12-17
  */
 
 const router = require('express').Router();

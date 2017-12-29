@@ -1,8 +1,8 @@
 /**
- * @fileOverview Main application file.
- * @author       Łukasz Wójcik
- * @license      MIT
- * @since        2017-12-17
+ * @file    Main application file.
+ * @author  Łukasz Wójcik
+ * @license MIT
+ * @since   2017-12-17
  */
 
 const fs = require('fs');
