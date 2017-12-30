@@ -43,3 +43,6 @@ ssl/
 
 # Environment variables
 .env
+
+# Test data folder
+__TESTDATA__
