@@ -8,6 +8,7 @@
 
 const bnetConfig = require('../../config/api/battlenet');
 const bnetApi = require('../../api/battlenet');
+const sc2Config = require('../../config/games/starcraft2');
 
 /**
  * General method for fetching StarCraft 2 player data available with Battle.net API key.
@@ -34,7 +35,6 @@ const getSc2PlayerData = (resource, server, profileId, profileRegion, profileNam
 /**
  * Fetches StarCraft 2 player profile.
  * @function
- * @param {string} resource - Name of the resource to fetch.
  * @param {string} server - Server name abbreviation.
  * @param {number} profileId - Player profile identifier.
  * @param {number} profileRegion - Player region single-digit identifier.
@@ -46,17 +46,53 @@ const getPlayerProfile = (server, profileId, profileRegion, profileName, callbac
 };
 
 /**
- * Fetches StarCraft 2 player ladder data.
+ * Filters returned ladder data based on the provided parameter.
  * @function
- * @param {string} resource - Name of the resource to fetch.
+ * @param {string} filter - Filter for choosing specific ladder queue.
+ * @param {object} ladderData - Ladder data object returned by Blizzard API.
+ * @param {function} callback - Callback function to pass the data to.
+ */
+const filterLadders = (filter, ladderData, callback) => {
+  const laddersToBeReturned = filter.toUpperCase();
+
+  if (!sc2Config.matchMaking.modes.includes(laddersToBeReturned)) {
+    callback({
+      error: `Wrong filter parameter (you provided: ${laddersToBeReturned}, available choices: ${sc2Config.matchMaking.modes.join(', ')})`,
+    });
+  }
+
+  const selectedModeIndex = sc2Config.matchMaking.modes.indexOf(laddersToBeReturned);
+  const selectedQueue = sc2Config.matchMaking.queues[selectedModeIndex];
+  const ladders = ladderData.currentSeason;
+  const filteredLadders = [];
+
+  Object.values(ladders).forEach((ladderObject) => {
+    const ladder = ladderObject.ladder[0];
+
+    if (selectedQueue === 'ALL') {
+      filteredLadders.push(ladder);
+    } else if (ladder && ladder.matchMakingQueue === selectedQueue) {
+      filteredLadders.push(ladder);
+    }
+  });
+
+  callback(filteredLadders.filter(Boolean));
+};
+
+/**
+ * Fetches StarCraft 2 player ladders data.
+ * @function
+ * @param {string} filter - Filter for choosing specific ladder queue.
  * @param {string} server - Server name abbreviation.
  * @param {number} profileId - Player profile identifier.
  * @param {number} profileRegion - Player region single-digit identifier.
  * @param {string} profileName - Player profile name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const getPlayerLadders = (server, profileId, profileRegion, profileName, callback) => {
-  getSc2PlayerData('ladders', server, profileId, profileRegion, profileName, callback);
+const getPlayerLadders = (filter, server, profileId, profileRegion, profileName, callback) => {
+  getSc2PlayerData('ladders', server, profileId, profileRegion, profileName, (returnedData) => {
+    filterLadders(filter, returnedData, callback);
+  });
 };
 
 /**
