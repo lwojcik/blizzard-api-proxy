@@ -98,7 +98,6 @@ const getPlayerLadders = (filter, server, profileId, profileRegion, profileName,
 /**
  * Fetches StarCraft 2 player match history.
  * @function
- * @param {string} resource - Name of the resource to fetch.
  * @param {string} server - Server name abbreviation.
  * @param {number} profileId - Player profile identifier.
  * @param {number} profileRegion - Player region single-digit identifier.
@@ -109,8 +108,26 @@ const getPlayerMatches = (server, profileId, profileRegion, profileName, callbac
   getSc2PlayerData('matches', server, profileId, profileRegion, profileName, callback);
 };
 
+/**
+ * Fetches StarCraft 2 player MMR.
+ * @function
+ * @param {string} filter - Filter for choosing specific ladder queue.
+ * @param {string} server - Server name abbreviation.
+ * @param {number} profileId - Player profile identifier.
+ * @param {number} profileRegion - Player region single-digit identifier.
+ * @param {string} profileName - Player profile name.
+ * @param {function} callback - Callback function to pass the data to.
+ */
+const getPlayerMMR = (filter, server, profileId, profileRegion, profileName, callback) => {
+  getSc2PlayerData('ladders', server, profileId, profileRegion, profileName, (returnedData) => {
+    filterLadders(filter, returnedData, callback);
+    // TODO fetch ladder ids and get mmr ratings from each of them
+  });
+};
+
 module.exports = {
   getPlayerProfile,
   getPlayerLadders,
   getPlayerMatches,
+  getPlayerMMR,
 };
