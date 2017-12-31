@@ -6,9 +6,13 @@
  * @since   2017-12-17
  */
 
+// const jsonQuery = require('json-query');
+
 const bnetConfig = require('../../config/api/battlenet');
-const bnetApi = require('../../api/battlenet');
 const sc2Config = require('../../config/games/starcraft2');
+const bnetApi = require('../../api/battlenet');
+const ladderApi = require('./ladder');
+
 
 /**
  * General method for fetching StarCraft 2 player data available with Battle.net API key.
@@ -120,8 +124,37 @@ const getPlayerMatches = (server, profileId, profileRegion, profileName, callbac
  */
 const getPlayerMMR = (filter, server, profileId, profileRegion, profileName, callback) => {
   getSc2PlayerData('ladders', server, profileId, profileRegion, profileName, (returnedData) => {
-    filterLadders(filter, returnedData, callback);
-    // TODO fetch ladder ids and get mmr ratings from each of them
+    filterLadders(filter, returnedData, (filteredLadders) => {
+      const filteredLadderIds = [];
+
+      Object.values(filteredLadders).forEach((ladder) => {
+        filteredLadderIds.push(ladder.ladderId);
+      });
+
+      // let ladderCounter = 0;
+      // const filteredLadderData = [];
+
+      Object.values(filteredLadderIds).forEach((filteredLadderId) => {
+        ladderApi.getAuthenticatedLadderData(server, filteredLadderId, (ladderObject) => {
+          // ladderCounter += 1;
+          callback(ladderObject);
+          // TODO query the ladder data and get the player object by its profile ID
+
+          // const ladderLeaderBoard = authenticatedLadderData.team;
+
+          // const playerDataObject = jsonQuery(['member[**].character_link[id=?]', profileId], {
+          //   data: ladderLeaderBoard,
+          // }).value;
+
+          // //const playerDataObjectIndex = playerDataObject.key;
+          // //const playerData = authenticatedLadderData.team[playerDataObjectIndex];
+          // // 96, 82 for 1v1
+          // filteredLadderData.push(playerDataObject);
+
+          // if (ladderCounter === filteredLadderIds.length) callback(filteredLadderData);
+        });
+      });
+    });
   });
 };
 
