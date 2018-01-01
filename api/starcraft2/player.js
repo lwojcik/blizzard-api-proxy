@@ -6,13 +6,10 @@
  * @since   2017-12-17
  */
 
-// const jsonQuery = require('json-query');
-
 const bnetConfig = require('../../config/api/battlenet');
 const sc2Config = require('../../config/games/starcraft2');
 const bnetApi = require('../../api/battlenet');
 const ladderApi = require('./ladder');
-
 
 /**
  * General method for fetching StarCraft 2 player data available with Battle.net API key.
@@ -70,7 +67,7 @@ const filterLadders = (filter, ladderData, callback) => {
   const ladders = ladderData.currentSeason;
   const filteredLadders = [];
 
-  Object.values(ladders).forEach((ladderObject) => {
+  ladders.forEach((ladderObject) => {
     const ladder = ladderObject.ladder[0];
 
     if (selectedQueue === 'ALL') {
@@ -79,7 +76,6 @@ const filterLadders = (filter, ladderData, callback) => {
       filteredLadders.push(ladder);
     }
   });
-
   callback(filteredLadders.filter(Boolean));
 };
 
@@ -94,9 +90,15 @@ const filterLadders = (filter, ladderData, callback) => {
  * @param {function} callback - Callback function to pass the data to.
  */
 const getPlayerLadders = (filter, server, profileId, profileRegion, profileName, callback) => {
-  getSc2PlayerData('ladders', server, profileId, profileRegion, profileName, (returnedData) => {
-    filterLadders(filter, returnedData, callback);
-  });
+  try {
+    getSc2PlayerData('ladders', server, profileId, profileRegion, profileName, (returnedData) => {
+      filterLadders(filter, returnedData, callback);
+    });
+  } catch (e) {
+    callback({
+      error: 'Can\'t fetch MMR data. One or more URL parameters are missing or malformed.',
+    });
+  }
 };
 
 /**
@@ -113,7 +115,7 @@ const getPlayerMatches = (server, profileId, profileRegion, profileName, callbac
 };
 
 /**
- * Fetches StarCraft 2 player MMR.
+ * Fetches StarCraft 2 player ladder data including MMR.
  * @function
  * @param {string} filter - Filter for choosing specific ladder queue.
  * @param {string} server - Server name abbreviation.
@@ -123,39 +125,71 @@ const getPlayerMatches = (server, profileId, profileRegion, profileName, callbac
  * @param {function} callback - Callback function to pass the data to.
  */
 const getPlayerMMR = (filter, server, profileId, profileRegion, profileName, callback) => {
-  getSc2PlayerData('ladders', server, profileId, profileRegion, profileName, (returnedData) => {
-    filterLadders(filter, returnedData, (filteredLadders) => {
-      const filteredLadderIds = [];
+  try {
+    getSc2PlayerData('ladders', server, profileId, profileRegion, profileName, (returnedData) => {
+      filterLadders(filter, returnedData, (filteredLadders) => {
+        const filteredLadderIds = [];
+        try {
+          filteredLadders.forEach((ladder) => {
+            filteredLadderIds.push(ladder.ladderId);
+          });
 
-      Object.values(filteredLadders).forEach((ladder) => {
-        filteredLadderIds.push(ladder.ladderId);
-      });
+          let ladderCounter = 0;
+          const filteredLadderData = [];
 
-      // let ladderCounter = 0;
-      // const filteredLadderData = [];
+          filteredLadderIds.forEach((filteredLadderId) => {
+            ladderApi.getAuthenticatedLadderData(server, filteredLadderId, (ladderObject) => {
+              const ladderLeaderboard = ladderObject.team;
+              const leagueId = ladderObject.league.league_key.league_id;
+              const playerRank = sc2Config.matchMaking.ranks[leagueId];
+              const teamType = ladderObject.league.league_key.team_type;
+              const teamTypeName = sc2Config.matchMaking.teamTypes[teamType];
 
-      Object.values(filteredLadderIds).forEach((filteredLadderId) => {
-        ladderApi.getAuthenticatedLadderData(server, filteredLadderId, (ladderObject) => {
-          // ladderCounter += 1;
-          callback(ladderObject);
-          // TODO query the ladder data and get the player object by its profile ID
+              ladderLeaderboard.forEach((playerDataObject) => {
+                const memberList = playerDataObject.member;
 
-          // const ladderLeaderBoard = authenticatedLadderData.team;
+                memberList.forEach((member) => {
+                  if (member.character_link.id === Number(profileId)) {
+                    const playerMMR = playerDataObject.rating;
 
-          // const playerDataObject = jsonQuery(['member[**].character_link[id=?]', profileId], {
-          //   data: ladderLeaderBoard,
-          // }).value;
+                    filteredLadderData.push({
+                      filter,
+                      ladder: {
+                        id: filteredLadderId,
+                        league_id: leagueId,
+                        rank: playerRank,
+                        team_type: teamType,
+                        team_type_name: teamTypeName,
+                      },
+                      player: {
+                        server,
+                        id: profileId,
+                        region: profileRegion,
+                        name: profileName,
+                        mmr: playerMMR,
+                      },
+                      source_data: playerDataObject,
+                    });
+                  }
+                });
+              });
 
-          // //const playerDataObjectIndex = playerDataObject.key;
-          // //const playerData = authenticatedLadderData.team[playerDataObjectIndex];
-          // // 96, 82 for 1v1
-          // filteredLadderData.push(playerDataObject);
-
-          // if (ladderCounter === filteredLadderIds.length) callback(filteredLadderData);
-        });
+              ladderCounter += 1;
+              if (ladderCounter === filteredLadderIds.length) callback(filteredLadderData);
+            });
+          });
+        } catch (e) {
+          callback({
+            error: 'Can\'t fetch MMR data. One or more URL parameters are missing or malformed.',
+          });
+        }
       });
     });
-  });
+  } catch (e) {
+    callback({
+      error: 'Can\'t fetch MMR data. One or more URL parameters are missing or malformed.',
+    });
+  }
 };
 
 module.exports = {
