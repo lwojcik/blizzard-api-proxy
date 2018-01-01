@@ -16,6 +16,7 @@ router.get('/', apicache(cache.static), (req, res) => {
     starcraft2_player_profile: `${config.siteUrl}/v1/sc2/player/profile`,
     starcraft2_player_ladders: `${config.siteUrl}/v1/sc2/player/ladders`,
     starcraft2_player_matches: `${config.siteUrl}/v1/sc2/player/matches`,
+    starcraft2_player_mmr: `${config.siteUrl}/v1/sc2/player/mmr`,
   });
 });
 
