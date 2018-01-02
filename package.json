@@ -1,6 +1,9 @@
 {
   "name": "blizzard-api-proxy",
-  "version": "0.1",
+  "description": "Node.js wrapper to Battle.net API and selected Blizzard games",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
   "main": "start.js",
   "scripts": {
     "start": "node --use_strict start.js"
