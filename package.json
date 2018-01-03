@@ -9,7 +9,7 @@
     "start": "node --use_strict start.js"
   },
   "dependencies": {
-    "apicache": "^0.11.2",
+    "apicache": "^1.2.0",
     "body-parser": "^1.15.2",
     "compression": "^1.6.2",
     "dotenv": "^4.0.0",
@@ -25,12 +25,12 @@
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-node": "^5.2.1",
-    "eslint-plugin-promise": "3.5.0",
+    "eslint-plugin-promise": "3.6.0",
     "gulp": "^3.9.1",
     "gulp-eslint": "^4.0.0",
     "gulp-shell": "^0.6.3",
     "gulp-util": "^3.0.7",
     "guppy-pre-commit": "^0.4.0",
-    "mocha": "3.5.1"
+    "mocha": "4.1.0"
   }
 }

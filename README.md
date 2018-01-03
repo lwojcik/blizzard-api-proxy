@@ -1,5 +1,7 @@
 # Blizzard API Proxy App
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/lwojcik/blizzard-api-proxy.svg)](https://greenkeeper.io/)
+
 Node.js wrapper to Battle.net API and selected Blizzard games. Handling endpoint access, authentication, caching and some data manipulation procedures so that other apps of mine don't have to handle that themselves.
 
 # Features
