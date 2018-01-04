@@ -1,4 +1,6 @@
-# StreamGato Battle.net API Wrapper
+# Blizzard API Proxy App
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/lwojcik/blizzard-api-proxy.svg)](https://greenkeeper.io/)
 
 Node.js wrapper to Battle.net API and selected Blizzard games. Handling endpoint access, authentication, caching and some data manipulation procedures so that other apps of mine don't have to handle that themselves.
 
@@ -18,8 +20,4 @@ Node.js wrapper to Battle.net API and selected Blizzard games. Handling endpoint
 
 # License
 
-Licensed under [MIT license](https://bitbucket.org/lwojcik/blizzard-api-proxy/raw/HEAD/LICENSE). See [LICENSE](https://bitbucket.org/lwojcik/blizzard-api-proxy/raw/HEAD/LICENSE) for more info.
-
-# Credits
-
-Bitbucket project icon by [fivetwofoureight](http://fivetwofoureight.deviantart.com/).
+Licensed under [MIT license](https://github.com/lwojcik/blizzard-api-proxy/blob/master/LICENSE). See [LICENSE](https://github.com/lwojcik/blizzard-api-proxy/blob/master/LICENSE) for more info.
