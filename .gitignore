@@ -46,3 +46,6 @@ ssl/
 
 # Test data folder
 __TESTDATA__
+
+# Diskdb folder
+db/

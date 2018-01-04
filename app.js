@@ -5,22 +5,19 @@
  * @since   2017-12-17
  */
 
+require('dotenv').config();
+
 const fs = require('fs');
 const https = require('https');
 const express = require('express');
 const bodyParser = require('body-parser');
 const compression = require('compression');
 const helmet = require('helmet');
-const mongoose = require('mongoose');
 
 const config = require('./config/app');
-const database = require('./config/database');
 const ssl = require('./config/ssl');
 
 const app = express();
-
-mongoose.connect(database.url, { useMongoClient: true });
-mongoose.Promise = global.Promise;
 
 /** Compression middleware */
 app.use(compression());
