@@ -5,5 +5,4 @@
  * @since   2017-12-17
  */
 
-require('dotenv').config();
 require('./app.js');
