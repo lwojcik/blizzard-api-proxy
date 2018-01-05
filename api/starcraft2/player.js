@@ -166,8 +166,13 @@ const getPlayerMMR = (mode, player, callback) => {
     getSc2PlayerData('ladders', player, (returnedData) => {
       filterLaddersByMode(mode, returnedData, (filteredLadders) => {
         const filteredLadderIds = [];
-
-        if (filteredLadders.error) {
+        if (filteredLadders.length === 0) {
+          callback({
+            mode,
+            ladders_found: 0,
+            data: [],
+          });
+        } else if (filteredLadders.error) {
           callback(filteredLadders);
         } else {
           try {
@@ -194,10 +199,10 @@ const getPlayerMMR = (mode, player, callback) => {
                       const mmr = playerDataObject.rating;
 
                       filteredLadderData.push({
-                        mode,
                         ladder: {
                           id: filteredLadderId,
                           league_id: leagueId,
+                          mode: playerDataObject.member.length,
                           rank: playerRank,
                           team_type: teamType,
                           team_type_name: teamTypeName,
@@ -209,14 +214,34 @@ const getPlayerMMR = (mode, player, callback) => {
                           name,
                           mmr,
                         },
-                        source_data: playerDataObject,
+                        data: {
+                          rating: playerDataObject.rating,
+                          wins: playerDataObject.wins,
+                          loses: playerDataObject.loses,
+                          ties: playerDataObject.ties,
+                          points: playerDataObject.points,
+                          longest_win_streak: playerDataObject.longest_win_streak,
+                          current_win_streak: playerDataObject.current_win_streak,
+                          current_rank: playerDataObject.current_rank,
+                          highest_rank: playerDataObject.highest_rank,
+                          previous_rank: playerDataObject.previous_rank,
+                          join_time_stamp: playerDataObject.join_time_stamp,
+                          last_played_time_stamp: playerDataObject.last_played_time_stamp,
+                        },
+                        source: playerDataObject,
                       });
                     }
                   });
                 });
 
                 ladderCounter += 1;
-                if (ladderCounter === filteredLadderIds.length) callback(filteredLadderData);
+                if (ladderCounter === filteredLadderIds.length) {
+                  callback({
+                    mode,
+                    ladders_found: filteredLadderData.length,
+                    data: filteredLadderData,
+                  });
+                }
               });
             });
           } catch (e) {
