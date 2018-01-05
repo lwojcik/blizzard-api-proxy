@@ -13,7 +13,6 @@ const apicache = require('apicache').options({ debug: cache.debug }).middleware;
 /** Main route */
 router.get('/', apicache(cache.static), (req, res) => {
   res.json({
-    battlenet_api: `${config.siteUrl}/v1/bnet`,
     starcraft2_api: `${config.siteUrl}/v1/sc2`,
   });
 });
