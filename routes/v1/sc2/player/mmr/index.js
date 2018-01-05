@@ -18,43 +18,31 @@ router.get('/', apicache(cache.static), (req, res) => {
   res.json({
     starcraft2_player_mmr: {
       all_modes: {
-        top_ladder: 'TODO',
+        top_ladder: `${config.siteUrl}/${routePath}/all/top/:server/:profileId/:profileRegion/:profileName`,
         all_ladders: `${config.siteUrl}/${routePath}/all/all/:server/:profileId/:profileRegion/:profileName`,
       },
       '1v1': {
-        top_ladder: 'TODO',
+        top_ladder: `${config.siteUrl}/${routePath}/1v1/top/:server/:profileId/:profileRegion/:profileName`,
         all_ladders: `${config.siteUrl}/${routePath}/1v1/all/:server/:profileId/:profileRegion/:profileName`,
       },
       archon: {
-        top_ladder: 'TODO',
+        top_ladder: `${config.siteUrl}/${routePath}/archon/top/:server/:profileId/:profileRegion/:profileName`,
         all_ladders: `${config.siteUrl}/${routePath}/archon/all/:server/:profileId/:profileRegion/:profileName`,
       },
       '2v2': {
-        top_ladder: 'TODO',
+        top_ladder: `${config.siteUrl}/${routePath}/2v2/top/:server/:profileId/:profileRegion/:profileName`,
         all_ladders: `${config.siteUrl}/${routePath}/2v2/all/:server/:profileId/:profileRegion/:profileName`,
       },
       '3v3': {
-        top_ladder: 'TODO',
+        top_ladder: `${config.siteUrl}/${routePath}/3v3/top/:server/:profileId/:profileRegion/:profileName`,
         all_ladders: `${config.siteUrl}/${routePath}/3v3/all/:server/:profileId/:profileRegion/:profileName`,
       },
       '4v4': {
-        top_ladder: 'TODO',
+        top_ladder: `${config.siteUrl}/${routePath}/4v4/top/:server/:profileId/:profileRegion/:profileName`,
         all_ladders: `${config.siteUrl}/${routePath}/4v4/all/:server/:profileId/:profileRegion/:profileName`,
       },
     },
   });
-});
-
-/** Default route for player MMR */
-router.get('/:server/:profileId/:profileRegion/:profileName', apicache(cache.request), (req, res) => {
-  const player = {
-    server: req.params.server,
-    id: req.params.profileId,
-    region: req.params.profileRegion,
-    name: req.params.profileName,
-  };
-
-  sc2playerApi.getPlayerMMR('ALL', 'ALL', player, res.json.bind(res));
 });
 
 /** Route for MMR from selected player ladder */
