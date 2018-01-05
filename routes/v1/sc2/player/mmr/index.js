@@ -11,16 +11,37 @@ const cache = require('../../../../../config/cache');
 const apicache = require('apicache').options({ debug: cache.debug }).middleware;
 const sc2playerApi = require('../../../../../api/starcraft2/player');
 
+const routePath = 'v1/sc2/player/mmr';
+
 /** Main route */
 router.get('/', apicache(cache.static), (req, res) => {
   res.json({
-    starcraft2_player_mmr: `${config.siteUrl}/v1/sc2/player/mmr/:server/:profileId/:profileRegion/:profileName`,
-    starcraft2_player_mmr_all: `${config.siteUrl}/v1/sc2/player/mmr/all/:server/:profileId/:profileRegion/:profileName`,
-    starcraft2_player_mmr_1v1: `${config.siteUrl}/v1/sc2/player/mmr/1v1/:server/:profileId/:profileRegion/:profileName`,
-    starcraft2_player_mmr_archon: `${config.siteUrl}/v1/sc2/player/mmr/archon/:server/:profileId/:profileRegion/:profileName`,
-    starcraft2_player_mmr_2v2: `${config.siteUrl}/v1/sc2/player/mmr/2v2/:server/:profileId/:profileRegion/:profileName`,
-    starcraft2_player_mmr_3v3: `${config.siteUrl}/v1/sc2/player/mmr/3v3/:server/:profileId/:profileRegion/:profileName`,
-    starcraft2_player_mmr_4v4: `${config.siteUrl}/v1/sc2/player/mmr/4v4/:server/:profileId/:profileRegion/:profileName`,
+    starcraft2_player_mmr: {
+      all_modes: {
+        top_ladder: 'TODO',
+        all_ladders: `${config.siteUrl}/${routePath}/all/all/:server/:profileId/:profileRegion/:profileName`,
+      },
+      '1v1': {
+        top_ladder: 'TODO',
+        all_ladders: `${config.siteUrl}/${routePath}/1v1/all/:server/:profileId/:profileRegion/:profileName`,
+      },
+      archon: {
+        top_ladder: 'TODO',
+        all_ladders: `${config.siteUrl}/${routePath}/archon/all/:server/:profileId/:profileRegion/:profileName`,
+      },
+      '2v2': {
+        top_ladder: 'TODO',
+        all_ladders: `${config.siteUrl}/${routePath}/2v2/all/:server/:profileId/:profileRegion/:profileName`,
+      },
+      '3v3': {
+        top_ladder: 'TODO',
+        all_ladders: `${config.siteUrl}/${routePath}/3v3/all/:server/:profileId/:profileRegion/:profileName`,
+      },
+      '4v4': {
+        top_ladder: 'TODO',
+        all_ladders: `${config.siteUrl}/${routePath}/4v4/all/:server/:profileId/:profileRegion/:profileName`,
+      },
+    },
   });
 });
 
@@ -33,12 +54,12 @@ router.get('/:server/:profileId/:profileRegion/:profileName', apicache(cache.req
     name: req.params.profileName,
   };
 
-  sc2playerApi.getPlayerMMR('ALL', player, res.json.bind(res));
+  sc2playerApi.getPlayerMMR('ALL', 'ALL', player, res.json.bind(res));
 });
 
 /** Route for MMR from selected player ladder */
-router.get('/:filter/:server/:profileId/:profileRegion/:profileName', apicache(cache.request), (req, res) => {
-  const { filter } = req.params;
+router.get('/:mode/:filter/:server/:profileId/:profileRegion/:profileName', apicache(cache.request), (req, res) => {
+  const { mode, filter } = req.params;
   const player = {
     server: req.params.server,
     id: req.params.profileId,
@@ -46,13 +67,13 @@ router.get('/:filter/:server/:profileId/:profileRegion/:profileName', apicache(c
     name: req.params.profileName,
   };
 
-  sc2playerApi.getPlayerMMR(filter, player, res.json.bind(res));
+  sc2playerApi.getPlayerMMR(mode, filter, player, res.json.bind(res));
 });
 
 /** Default route for malformed requests */
 router.get('/*', apicache(cache.static), (req, res) => {
   res.json({
-    error: 'Wrong or missing request parameters (filter, server, profileId, profileRegion, profileName)',
+    error: 'Wrong or missing request parameters (mode, filter, server, profileId, profileRegion, profileName)',
   });
 });
 
