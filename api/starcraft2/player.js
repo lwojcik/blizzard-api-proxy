@@ -44,7 +44,6 @@ const validatePlayerObject = (playerObject) => {
  * General method for fetching StarCraft 2 player data available with Battle.net API key.
  * @function
  * @param {string} resource - Name of the resource to fetch.
- * @param {string} server - Server name abbreviation.
  * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
@@ -154,10 +153,11 @@ const getPlayerMatches = (player, callback) => {
  * Fetches StarCraft 2 player ladder data including MMR.
  * @function
  * @param {string} mode - Player matchmaking mode (e.g. 1v1).
+ * @param {string} filter - How much data should be returned ('ALL' - all, 'TOP' - top ladder only).
  * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const getPlayerMMR = (mode, player, callback) => {
+const getPlayerMMR = (mode, filter, player, callback) => {
   const {
     server, id, region, name // eslint-disable-line comma-dangle
   } = player;
@@ -169,6 +169,7 @@ const getPlayerMMR = (mode, player, callback) => {
         if (filteredLadders.length === 0) {
           callback({
             mode,
+            filter,
             ladders_found: 0,
             data: [],
           });
@@ -237,6 +238,7 @@ const getPlayerMMR = (mode, player, callback) => {
                 if (ladderCounter === filteredLadderIds.length) {
                   callback({
                     mode,
+                    filter,
                     ladders_found: filteredLadderData.length,
                     data: filteredLadderData,
                   });
