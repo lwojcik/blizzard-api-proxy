@@ -202,7 +202,6 @@ const getPlayerMMR = (mode, player, callback) => {
                         ladder: {
                           id: filteredLadderId,
                           league_id: leagueId,
-                          mode: playerDataObject.member.length,
                           rank: playerRank,
                           team_type: teamType,
                           team_type_name: teamTypeName,
