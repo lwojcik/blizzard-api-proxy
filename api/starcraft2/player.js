@@ -21,7 +21,11 @@ const ladderApi = require('./ladder');
  * @param {string} profileName - Player profile name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const getSc2PlayerData = (resource, server, profileId, profileRegion, profileName, callback) => {
+const getSc2PlayerData = (resource, player, callback) => {
+  const {
+    server, id, region, name // eslint-disable-line comma-dangle
+  } = player;
+
   if (!bnetConfig.servers.includes(server)) {
     callback({
       error: `Wrong server (you provided: ${server}, available choices: ${bnetConfig.servers.join(', ')})`,
@@ -29,21 +33,18 @@ const getSc2PlayerData = (resource, server, profileId, profileRegion, profileNam
   }
 
   const requestedResource = (resource === 'profile') ? '' : resource;
-  const requestPath = `/sc2/profile/${profileId}/${profileRegion}/${profileName}/${requestedResource}`;
+  const requestPath = `/sc2/profile/${id}/${region}/${name}/${requestedResource}`;
   bnetApi.queryWithApiKey(server, requestPath, callback);
 };
 
 /**
  * Fetches StarCraft 2 player profile.
  * @function
- * @param {string} server - Server name abbreviation.
- * @param {number} profileId - Player profile identifier.
- * @param {number} profileRegion - Player region single-digit identifier.
- * @param {string} profileName - Player profile name.
+ * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const getPlayerProfile = (server, profileId, profileRegion, profileName, callback) => {
-  getSc2PlayerData('profile', server, profileId, profileRegion, profileName, callback);
+const getPlayerProfile = (player, callback) => {
+  getSc2PlayerData('profile', player, callback);
 };
 
 /**
@@ -83,15 +84,12 @@ const filterLadders = (filter, ladderData, callback) => {
  * Fetches StarCraft 2 player ladders data.
  * @function
  * @param {string} filter - Filter for choosing specific ladder queue.
- * @param {string} server - Server name abbreviation.
- * @param {number} profileId - Player profile identifier.
- * @param {number} profileRegion - Player region single-digit identifier.
- * @param {string} profileName - Player profile name.
+ * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const getPlayerLadders = (filter, server, profileId, profileRegion, profileName, callback) => {
+const getPlayerLadders = (filter, player, callback) => {
   try {
-    getSc2PlayerData('ladders', server, profileId, profileRegion, profileName, (returnedData) => {
+    getSc2PlayerData('ladders', player, (returnedData) => {
       filterLadders(filter, returnedData, callback);
     });
   } catch (e) {
@@ -105,28 +103,27 @@ const getPlayerLadders = (filter, server, profileId, profileRegion, profileName,
  * Fetches StarCraft 2 player match history.
  * @function
  * @param {string} server - Server name abbreviation.
- * @param {number} profileId - Player profile identifier.
- * @param {number} profileRegion - Player region single-digit identifier.
- * @param {string} profileName - Player profile name.
+ * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const getPlayerMatches = (server, profileId, profileRegion, profileName, callback) => {
-  getSc2PlayerData('matches', server, profileId, profileRegion, profileName, callback);
+const getPlayerMatches = (player, callback) => {
+  getSc2PlayerData('matches', player, callback);
 };
 
 /**
  * Fetches StarCraft 2 player ladder data including MMR.
  * @function
  * @param {string} filter - Filter for choosing specific ladder queue.
- * @param {string} server - Server name abbreviation.
- * @param {number} profileId - Player profile identifier.
- * @param {number} profileRegion - Player region single-digit identifier.
- * @param {string} profileName - Player profile name.
+ * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const getPlayerMMR = (filter, server, profileId, profileRegion, profileName, callback) => {
+const getPlayerMMR = (filter, player, callback) => {
+  const {
+    server, id, region, name // eslint-disable-line comma-dangle
+  } = player;
+
   try {
-    getSc2PlayerData('ladders', server, profileId, profileRegion, profileName, (returnedData) => {
+    getSc2PlayerData('ladders', player, (returnedData) => {
       filterLadders(filter, returnedData, (filteredLadders) => {
         const filteredLadderIds = [];
         try {
@@ -149,8 +146,8 @@ const getPlayerMMR = (filter, server, profileId, profileRegion, profileName, cal
                 const memberList = playerDataObject.member;
 
                 memberList.forEach((member) => {
-                  if (member.character_link.id === Number(profileId)) {
-                    const playerMMR = playerDataObject.rating;
+                  if (member.character_link.id === Number(id)) {
+                    const mmr = playerDataObject.rating;
 
                     filteredLadderData.push({
                       filter,
@@ -163,10 +160,10 @@ const getPlayerMMR = (filter, server, profileId, profileRegion, profileName, cal
                       },
                       player: {
                         server,
-                        id: profileId,
-                        region: profileRegion,
-                        name: profileName,
-                        mmr: playerMMR,
+                        id,
+                        region,
+                        name,
+                        mmr,
                       },
                       source_data: playerDataObject,
                     });
