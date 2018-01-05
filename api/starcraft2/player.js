@@ -23,7 +23,7 @@ const validatePlayerObject = (playerObject) => {
   const playerObjectSchema = Joi.object().keys({
     server: Joi.any().valid(bnetConfig.servers).required(),
     id: Joi.number().integer().positive().required(),
-    region: Joi.number().integer().min(0).max(9)
+    region: Joi.number().integer().min(0).max(5)
       .required(),
     name: Joi.string().alphanum().max(12).required(),
   });
@@ -45,9 +45,7 @@ const validatePlayerObject = (playerObject) => {
  * @function
  * @param {string} resource - Name of the resource to fetch.
  * @param {string} server - Server name abbreviation.
- * @param {number} profileId - Player profile identifier.
- * @param {number} profileRegion - Player region single-digit identifier.
- * @param {string} profileName - Player profile name.
+ * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
 const getSc2PlayerData = (resource, player, callback) => {
@@ -60,7 +58,16 @@ const getSc2PlayerData = (resource, player, callback) => {
   if (isPlayerObjectValid === true) {
     const requestedResource = (resource === 'profile') ? '' : resource;
     const requestPath = `/sc2/profile/${id}/${region}/${name}/${requestedResource}`;
-    bnetApi.queryWithApiKey(server, requestPath, callback);
+    bnetApi.queryWithApiKey(server, requestPath, (returnedData) => {
+      if (returnedData.status === 'nok') {
+        callback({
+          error: 'battlenet_api_error_500',
+          details: returnedData,
+        });
+      } else {
+        callback(returnedData);
+      }
+    });
   } else {
     callback(isPlayerObjectValid);
   }
@@ -97,16 +104,20 @@ const filterLaddersByMode = (mode, ladderData, callback) => {
   const ladders = ladderData.currentSeason;
   const filteredLadders = [];
 
-  ladders.forEach((ladderObject) => {
-    const ladder = ladderObject.ladder[0];
+  if (ladderData.error) {
+    callback(ladderData);
+  } else {
+    ladders.forEach((ladderObject) => {
+      const ladder = ladderObject.ladder[0];
 
-    if (selectedQueue === 'ALL') {
-      filteredLadders.push(ladder);
-    } else if (ladder && ladder.matchMakingQueue === selectedQueue) {
-      filteredLadders.push(ladder);
-    }
-  });
-  callback(filteredLadders.filter(Boolean));
+      if (selectedQueue === 'ALL') {
+        filteredLadders.push(ladder);
+      } else if (ladder && ladder.matchMakingQueue === selectedQueue) {
+        filteredLadders.push(ladder);
+      }
+    });
+    callback(filteredLadders.filter(Boolean));
+  }
 };
 
 /**
@@ -155,59 +166,64 @@ const getPlayerMMR = (mode, player, callback) => {
     getSc2PlayerData('ladders', player, (returnedData) => {
       filterLaddersByMode(mode, returnedData, (filteredLadders) => {
         const filteredLadderIds = [];
-        try {
-          filteredLadders.forEach((ladder) => {
-            filteredLadderIds.push(ladder.ladderId);
-          });
 
-          let ladderCounter = 0;
-          const filteredLadderData = [];
-
-          filteredLadderIds.forEach((filteredLadderId) => {
-            ladderApi.getAuthenticatedLadderData(server, filteredLadderId, (ladderObject) => {
-              const ladderLeaderboard = ladderObject.team;
-              const leagueId = ladderObject.league.league_key.league_id;
-              const playerRank = sc2Config.matchMaking.ranks[leagueId];
-              const teamType = ladderObject.league.league_key.team_type;
-              const teamTypeName = sc2Config.matchMaking.teamTypes[teamType];
-
-              ladderLeaderboard.forEach((playerDataObject) => {
-                const memberList = playerDataObject.member;
-
-                memberList.forEach((member) => {
-                  if (member.character_link.id === Number(id)) {
-                    const mmr = playerDataObject.rating;
-
-                    filteredLadderData.push({
-                      mode,
-                      ladder: {
-                        id: filteredLadderId,
-                        league_id: leagueId,
-                        rank: playerRank,
-                        team_type: teamType,
-                        team_type_name: teamTypeName,
-                      },
-                      player: {
-                        server,
-                        id,
-                        region,
-                        name,
-                        mmr,
-                      },
-                      source_data: playerDataObject,
-                    });
-                  }
-                });
-              });
-
-              ladderCounter += 1;
-              if (ladderCounter === filteredLadderIds.length) callback(filteredLadderData);
+        if (filteredLadders.error) {
+          callback(filteredLadders);
+        } else {
+          try {
+            filteredLadders.forEach((ladder) => {
+              filteredLadderIds.push(ladder.ladderId);
             });
-          });
-        } catch (e) {
-          callback({
-            error: 'Can\'t fetch MMR data. One or more URL parameters are missing or malformed.',
-          });
+
+            let ladderCounter = 0;
+            const filteredLadderData = [];
+
+            filteredLadderIds.forEach((filteredLadderId) => {
+              ladderApi.getAuthenticatedLadderData(server, filteredLadderId, (ladderObject) => {
+                const ladderLeaderboard = ladderObject.team;
+                const leagueId = ladderObject.league.league_key.league_id;
+                const playerRank = sc2Config.matchMaking.ranks[leagueId];
+                const teamType = ladderObject.league.league_key.team_type;
+                const teamTypeName = sc2Config.matchMaking.teamTypes[teamType];
+
+                ladderLeaderboard.forEach((playerDataObject) => {
+                  const memberList = playerDataObject.member;
+
+                  memberList.forEach((member) => {
+                    if (member.character_link.id === Number(id)) {
+                      const mmr = playerDataObject.rating;
+
+                      filteredLadderData.push({
+                        mode,
+                        ladder: {
+                          id: filteredLadderId,
+                          league_id: leagueId,
+                          rank: playerRank,
+                          team_type: teamType,
+                          team_type_name: teamTypeName,
+                        },
+                        player: {
+                          server,
+                          id,
+                          region,
+                          name,
+                          mmr,
+                        },
+                        source_data: playerDataObject,
+                      });
+                    }
+                  });
+                });
+
+                ladderCounter += 1;
+                if (ladderCounter === filteredLadderIds.length) callback(filteredLadderData);
+              });
+            });
+          } catch (e) {
+            callback({
+              error: 'Can\'t fetch MMR data. One or more URL parameters are missing or malformed.',
+            });
+          }
         }
       });
     });
