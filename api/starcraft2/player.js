@@ -50,16 +50,16 @@ const getPlayerProfile = (player, callback) => {
 /**
  * Filters returned ladder data based on the provided parameter.
  * @function
- * @param {string} filter - Filter for choosing specific ladder queue.
+ * @param {string} mode - Player matchmaking mode (e.g. 1v1).
  * @param {object} ladderData - Ladder data object returned by Blizzard API.
  * @param {function} callback - Callback function to pass the data to.
  */
-const filterLadders = (filter, ladderData, callback) => {
-  const laddersToBeReturned = filter.toUpperCase();
+const filterLaddersByMode = (mode, ladderData, callback) => {
+  const laddersToBeReturned = mode.toUpperCase();
 
   if (!sc2Config.matchMaking.modes.includes(laddersToBeReturned)) {
     callback({
-      error: `Wrong filter parameter (you provided: ${laddersToBeReturned}, available choices: ${sc2Config.matchMaking.modes.join(', ')})`,
+      error: `Wrong mode parameter (you provided: ${laddersToBeReturned}, available choices: ${sc2Config.matchMaking.modes.join(', ')})`,
     });
   }
 
@@ -83,14 +83,14 @@ const filterLadders = (filter, ladderData, callback) => {
 /**
  * Fetches StarCraft 2 player ladders data.
  * @function
- * @param {string} filter - Filter for choosing specific ladder queue.
+ * @param {string} mode - Player matchmaking mode (e.g. 1v1).
  * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const getPlayerLadders = (filter, player, callback) => {
+const getPlayerLadders = (mode, player, callback) => {
   try {
     getSc2PlayerData('ladders', player, (returnedData) => {
-      filterLadders(filter, returnedData, callback);
+      filterLaddersByMode(mode, returnedData, callback);
     });
   } catch (e) {
     callback({
@@ -113,18 +113,18 @@ const getPlayerMatches = (player, callback) => {
 /**
  * Fetches StarCraft 2 player ladder data including MMR.
  * @function
- * @param {string} filter - Filter for choosing specific ladder queue.
+ * @param {string} mode - Player matchmaking mode (e.g. 1v1).
  * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const getPlayerMMR = (filter, player, callback) => {
+const getPlayerMMR = (mode, player, callback) => {
   const {
     server, id, region, name // eslint-disable-line comma-dangle
   } = player;
 
   try {
     getSc2PlayerData('ladders', player, (returnedData) => {
-      filterLadders(filter, returnedData, (filteredLadders) => {
+      filterLaddersByMode(mode, returnedData, (filteredLadders) => {
         const filteredLadderIds = [];
         try {
           filteredLadders.forEach((ladder) => {
@@ -150,7 +150,7 @@ const getPlayerMMR = (filter, player, callback) => {
                     const mmr = playerDataObject.rating;
 
                     filteredLadderData.push({
-                      filter,
+                      mode,
                       ladder: {
                         id: filteredLadderId,
                         league_id: leagueId,
