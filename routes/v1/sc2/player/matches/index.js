@@ -20,11 +20,14 @@ router.get('/', apicache(cache.static), (req, res) => {
 
 /** Route for selected player matches */
 router.get('/:server/:profileId/:profileRegion/:profileName', apicache(cache.request), (req, res) => {
-  const {
-    server, profileId, profileRegion, profileName,
-  } = req.params;
+  const player = {
+    server: req.params.server,
+    id: req.params.profileId,
+    region: req.params.profileRegion,
+    name: req.params.profileName,
+  };
 
-  sc2playerApi.getPlayerMatches(server, profileId, profileRegion, profileName, res.json.bind(res));
+  sc2playerApi.getPlayerMatches(player, res.json.bind(res));
 });
 
 /** Default route for malformed requests */

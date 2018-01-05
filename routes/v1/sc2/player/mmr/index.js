@@ -26,26 +26,27 @@ router.get('/', apicache(cache.static), (req, res) => {
 
 /** Default route for player MMR */
 router.get('/:server/:profileId/:profileRegion/:profileName', apicache(cache.request), (req, res) => {
-  const {
-    server, profileId, profileRegion, profileName,
-  } = req.params;
+  const player = {
+    server: req.params.server,
+    id: req.params.profileId,
+    region: req.params.profileRegion,
+    name: req.params.profileName,
+  };
 
-  sc2playerApi.getPlayerMMR(
-    'ALL', server, profileId, profileRegion, profileName,
-    res.json.bind(res) // eslint-disable-line comma-dangle
-  );
+  sc2playerApi.getPlayerMMR('ALL', player, res.json.bind(res));
 });
 
 /** Route for MMR from selected player ladder */
 router.get('/:filter/:server/:profileId/:profileRegion/:profileName', apicache(cache.request), (req, res) => {
-  const {
-    filter, server, profileId, profileRegion, profileName,
-  } = req.params;
+  const { filter } = req.params;
+  const player = {
+    server: req.params.server,
+    id: req.params.profileId,
+    region: req.params.profileRegion,
+    name: req.params.profileName,
+  };
 
-  sc2playerApi.getPlayerMMR(
-    filter, server, profileId, profileRegion, profileName,
-    res.json.bind(res) // eslint-disable-line comma-dangle
-  );
+  sc2playerApi.getPlayerMMR(filter, player, res.json.bind(res));
 });
 
 /** Default route for malformed requests */
