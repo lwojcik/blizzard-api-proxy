@@ -6,10 +6,39 @@
  * @since   2017-12-17
  */
 
+const Joi = require('joi');
+
 const bnetConfig = require('../../config/api/battlenet');
 const sc2Config = require('../../config/games/starcraft2');
 const bnetApi = require('../../api/battlenet');
 const ladderApi = require('./ladder');
+
+/**
+ * Player object validator.
+ * @function
+ * @param {Object} player - Player object including server, id, region and name.
+ * @returns {(boolean|Object)} true if validation passed, error object if validation failed.
+ */
+const validatePlayerObject = (playerObject) => {
+  const playerObjectSchema = Joi.object().keys({
+    server: Joi.any().valid(bnetConfig.servers).required(),
+    id: Joi.number().integer().positive().required(),
+    region: Joi.number().integer().min(0).max(9)
+      .required(),
+    name: Joi.string().alphanum().max(12).required(),
+  });
+
+  const result = Joi.validate(playerObject, playerObjectSchema);
+
+  if (result.error === null) {
+    return true;
+  }
+
+  return {
+    error: 'validation_failed',
+    details: result.error.details,
+  };
+};
 
 /**
  * General method for fetching StarCraft 2 player data available with Battle.net API key.
@@ -26,15 +55,15 @@ const getSc2PlayerData = (resource, player, callback) => {
     server, id, region, name // eslint-disable-line comma-dangle
   } = player;
 
-  if (!bnetConfig.servers.includes(server)) {
-    callback({
-      error: `Wrong server (you provided: ${server}, available choices: ${bnetConfig.servers.join(', ')})`,
-    });
-  }
+  const isPlayerObjectValid = validatePlayerObject(player);
 
-  const requestedResource = (resource === 'profile') ? '' : resource;
-  const requestPath = `/sc2/profile/${id}/${region}/${name}/${requestedResource}`;
-  bnetApi.queryWithApiKey(server, requestPath, callback);
+  if (isPlayerObjectValid === true) {
+    const requestedResource = (resource === 'profile') ? '' : resource;
+    const requestPath = `/sc2/profile/${id}/${region}/${name}/${requestedResource}`;
+    bnetApi.queryWithApiKey(server, requestPath, callback);
+  } else {
+    callback(isPlayerObjectValid);
+  }
 };
 
 /**
