@@ -1,9 +1,18 @@
 {
+  "author": "Łukasz Wójcik <hello@lukaszwojcik.net> (https://github.com/lwojcik)",
   "name": "blizzard-api-proxy",
   "description": "Node.js wrapper to Battle.net API and selected Blizzard games",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "license": "MIT",
   "private": true,
+  "homepage": "https://github.com/lwojcik/blizzard-api-proxy",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/lwojcik/blizzard-api-proxy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lwojcik/blizzard-api-proxy/issues"
+  },
   "main": "start.js",
   "scripts": {
     "start": "node --use_strict start.js"
