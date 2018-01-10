@@ -55,18 +55,22 @@ const getSc2PlayerData = (resource, player, callback) => {
   const isPlayerObjectValid = validatePlayerObject(player);
 
   if (isPlayerObjectValid === true) {
+    const serverUri = bnetConfig.api.url[server];
     const requestedResource = (resource === 'profile') ? '' : resource;
     const requestPath = `/sc2/profile/${id}/${region}/${name}/${requestedResource}`;
-    bnetApi.queryWithApiKey(server, requestPath, (returnedData) => {
-      if (returnedData.status === 'nok') {
-        callback({
-          error: 'battlenet_api_error_500',
-          details: returnedData,
-        });
-      } else {
-        callback(returnedData);
-      }
-    });
+    const requestUri = `${serverUri}${requestPath}`;
+
+    bnetApi.query(requestUri)
+      .then((data) => {
+        if (data.status === 'nok') {
+          callback({
+            error: 'battlenet_api_error_500',
+            details: data,
+          });
+        } else {
+          callback(data);
+        }
+      });
   } else {
     callback(isPlayerObjectValid);
   }
