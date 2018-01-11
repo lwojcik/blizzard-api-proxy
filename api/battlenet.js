@@ -19,8 +19,8 @@ const query = (requestUri) => {
 
   return new Promise((resolve, reject) => {
     fetch(bnetRequestUri)
-      .then(res => resolve(res.json()))
-      .catch(err => reject(err));
+      .then(data => resolve(data.json()))
+      .catch(error => reject(error));
   });
 };
 

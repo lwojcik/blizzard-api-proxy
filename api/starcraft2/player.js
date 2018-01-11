@@ -98,7 +98,7 @@ const getPlayerProfile = (player, callback) => {
  * @param {object} ladderData - Ladder data object returned by Blizzard API.
  * @param {function} callback - Callback function to pass the data to.
  */
-const filterLaddersByMode = (mode, ladderData) => {
+const filterLaddersByMode = (ladderData, mode) => {
   const laddersToBeReturned = mode.toUpperCase();
 
   if (!sc2Config.matchMaking.modes.includes(laddersToBeReturned)) {
@@ -184,23 +184,32 @@ const extractLadderIds = ladderData => ladderData.map(ladder => ladder.ladderId)
  * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-// const extractPlayerDataByLadderId = (server, ladderIds) => {
-//   // const ladderData = [];
+const extractPlayerDataByLadderId = (server, ladderIds) => ladderIds;
+// const ladderData = [];
+// let ladderCounter = 0;
 
-//   // for (let ladderId of ladderIds) {
-//   //   await ladderApi.getLadderData(server, ladderId, (ladderObject) => {
-//   //     ladderData.push(ladderObject);
-//   //   });
-//   // }
+// return ladderIds;
 
-//   // return ladderData;
+// ladderIds.forEach((ladderId) => {
+//   ladderApi.getAuthenticatedLadderData(server, ladderId)
+//     .then((ladderObject) => {
+//       const ladderLeaderboard = ladderObject.team;
+//       const leagueId = ladderObject.league.league_key.league_id;
+//       const playerRank = sc2Config.matchMaking.ranks[leagueId];
+//       const teamType = ladderObject.league.league_key.team_type;
+//       const teamTypeName = sc2Config.matchMaking.teamTypes[teamType];
 
-//   // ladderIds.forEach((ladderId) => {
-//   //   ladderApi.getLadderData(server, ladderId, (ladderObject) => {
-//   //     ladderData.push(ladderObject);
-//   //     if(ladderId)
-//   //   });
-//   // });
+//       ladderData.push({
+//         ladderLeaderboard, leagueId, playerRank, teamType, teamTypeName,
+//       });
+
+//       ladderCounter += 1;
+//     });
+
+//   if (ladderCounter === ladderIds.length) {
+//     return ladderData;
+//   }
+// });
 // };
 
 /**
@@ -212,13 +221,15 @@ const extractLadderIds = ladderData => ladderData.map(ladder => ladder.ladderId)
  * @param {function} callback - Callback function to pass the data to.
  */
 const getPlayerMMR = (mode, filter, player, callback) => {
-  // const { server } = player;
+  const { server } = player;
+
   getSc2PlayerData('ladders', player)
-    .then(playerLadders => filterLaddersByMode(mode, playerLadders))
+    .then(playerLadders => filterLaddersByMode(playerLadders, mode))
     .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
-    // .then(extractedLadderIds => extractPlayerDataByLadderId(server, extractedLadderIds))
+    .then(extractedLadderIds => extractPlayerDataByLadderId(server, extractedLadderIds))
+    .then(extractedLadderData => callback(extractedLadderData))
     // .then(extractedLadderObjects => callback(extractedLadderObjects))
-    .then(data => callback(data))
+    // .then(data => callback(data))
     .catch(error => callback(error));
 
 //   // try {
