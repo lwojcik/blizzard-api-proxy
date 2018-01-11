@@ -24,7 +24,9 @@ router.get('/:server/:ladderId', apicache(cache.static), (req, res) => {
     server, ladderId,
   } = req.params;
 
-  sc2ladderApi.getLadderData(server, ladderId, res.json.bind(res));
+  sc2ladderApi.getLadderData(server, ladderId)
+    .then(ladderData => res.json(ladderData))
+    .catch(error => res.json(error));
 });
 
 /** Default route for malformed requests */

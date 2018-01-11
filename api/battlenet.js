@@ -24,14 +24,7 @@ const query = (requestUri) => {
   });
 };
 
-/**
- * Performs access-key authentication and fetches data from protected Battle.net endpoints.
- * @function
- * @param {string} server - server name abbreviation.
- * @param {string} requestPath - Path to request from.
- * @param {function} callback - Callback function to pass the data to.
- */
-const queryWithAccessToken = (server, requestPath) => {
+const getAccessTokenObject = (server) => {
   const clientId = bnetConfig.api.key;
   const clientSecret = bnetConfig.api.secret;
   const accessTokenRequestServer = bnetConfig.getAccessTokenUri[server];
@@ -39,18 +32,44 @@ const queryWithAccessToken = (server, requestPath) => {
   const accessTokenRequestUri = `${accessTokenRequestServer}${accessTokenApiPath}`;
 
   return new Promise((resolve, reject) => {
-    query(accessTokenRequestUri)
-      .then((data) => {
-        const accessToken = data.access_token;
-        const authenticatedRequestUri = bnetConfig.api.url[server];
-        const authenticatedRequestPath = `${authenticatedRequestUri}${requestPath}?access_token=${accessToken}`;
-        query(authenticatedRequestPath)
-          .then(authenticatedData => resolve(authenticatedData))
-          .catch(error => reject(error));
+    fetch(accessTokenRequestUri)
+      .then((accessTokenData) => {
+        resolve(accessTokenData.json());
       })
       .catch(error => reject(error));
   });
 };
+
+const getDataWithAccessToken = (accessToken, requestPath) => {
+  const requestUri = `${requestPath}?access_token=${accessToken}`;
+
+  return new Promise((resolve, reject) => {
+    fetch(requestUri)
+      .then(authenticatedData => resolve(authenticatedData.json()))
+      .catch(error => reject(error));
+  });
+};
+
+/**
+ * Performs access-key authentication and fetches data from protected Battle.net endpoints.
+ * @function
+ * @param {string} server - server name abbreviation.
+ * @param {string} requestPath - Path to request from.
+ * @param {function} callback - Callback function to pass the data to.
+ */
+const queryWithAccessToken = (server, requestPath) => new Promise((resolve, reject) => {
+  getAccessTokenObject(server)
+    .then((accessTokenObject) => {
+      const accessToken = accessTokenObject.access_token;
+      const authenticatedRequestUri = bnetConfig.api.url[server];
+      const authenticatedRequestPath = `${authenticatedRequestUri}${requestPath}`;
+
+      getDataWithAccessToken(accessToken, authenticatedRequestPath)
+        .then(authenticatedData => resolve(authenticatedData))
+        .catch(error => reject(error));
+    })
+    .catch(error => reject(error));
+});
 
 module.exports = {
   query,

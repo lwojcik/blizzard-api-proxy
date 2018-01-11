@@ -174,7 +174,34 @@ const getPlayerMatches = player => new Promise((resolve, reject) => {
  * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-// const extractPlayerInfoFromLadder = ladder => ladder;
+const extractLadderIds = ladderData => ladderData.map(ladder => ladder.ladderId);
+
+/**
+ * Extracts StarCraft 2 player data from ladder object.
+ * @function
+ * @param {Object} ladder - Ladder object.
+ * @param {string} filter - How much data should be returned ('ALL' - all, 'TOP' - top ladder only).
+ * @param {Object} player - Player object including server, id, region and name.
+ * @param {function} callback - Callback function to pass the data to.
+ */
+// const extractPlayerDataByLadderId = (server, ladderIds) => {
+//   // const ladderData = [];
+
+//   // for (let ladderId of ladderIds) {
+//   //   await ladderApi.getLadderData(server, ladderId, (ladderObject) => {
+//   //     ladderData.push(ladderObject);
+//   //   });
+//   // }
+
+//   // return ladderData;
+
+//   // ladderIds.forEach((ladderId) => {
+//   //   ladderApi.getLadderData(server, ladderId, (ladderObject) => {
+//   //     ladderData.push(ladderObject);
+//   //     if(ladderId)
+//   //   });
+//   // });
+// };
 
 /**
  * Fetches StarCraft 2 player ladder data including MMR.
@@ -185,9 +212,13 @@ const getPlayerMatches = player => new Promise((resolve, reject) => {
  * @param {function} callback - Callback function to pass the data to.
  */
 const getPlayerMMR = (mode, filter, player, callback) => {
+  // const { server } = player;
   getSc2PlayerData('ladders', player)
     .then(playerLadders => filterLaddersByMode(mode, playerLadders))
-    .then(filteredPlayerLadders => callback(filteredPlayerLadders))
+    .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
+    // .then(extractedLadderIds => extractPlayerDataByLadderId(server, extractedLadderIds))
+    // .then(extractedLadderObjects => callback(extractedLadderObjects))
+    .then(data => callback(data))
     .catch(error => callback(error));
 
 //   // try {
