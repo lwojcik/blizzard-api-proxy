@@ -25,7 +25,7 @@ router.get('/:server/:ladderId', apicache(cache.expensiveRequest), (req, res) =>
   } = req.params;
 
   sc2ladderApi.getAuthenticatedLadderData(server, ladderId)
-    .then(authenticatedLadderData => res.json(authenticatedLadderData))
+    .then(data => res.json(data))
     .catch(error => res.json(error));
 });
 

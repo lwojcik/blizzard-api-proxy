@@ -65,7 +65,7 @@ const getSc2PlayerData = (resource, player) => {
       .then((data) => {
         if (data.status === 'nok') {
           resolve({
-            error: 'battlenet_api_error_500',
+            error: 'battlenet_api_error',
             details: data,
           });
         } else {
@@ -73,9 +73,6 @@ const getSc2PlayerData = (resource, player) => {
         }
       })
       .catch(error => reject(error));
-    // } else {
-    //   console.log(isPlayerObjectValid);
-    // }
   });
 };
 
@@ -118,7 +115,6 @@ const filterLaddersByMode = (ladderData, mode) => {
     } else {
       ladders.forEach((ladderObject) => {
         const ladder = ladderObject.ladder[0];
-
         if (selectedQueue === 'ALL') {
           filteredLadders.push(ladder);
         } else if (ladder && ladder.matchMakingQueue === selectedQueue) {
@@ -144,12 +140,11 @@ const filterLaddersByMode = (ladderData, mode) => {
 /**
  * Fetches StarCraft 2 player ladders data.
  * @function
- * @param {string} mode - Player matchmaking mode (e.g. 1v1).
  * @param {Object} player - Player object including server, id, region and name.
  */
 const getPlayerLadders = (mode, player) => new Promise((resolve, reject) => {
   getSc2PlayerData('ladders', player)
-    .then(returnedData => filterLaddersByMode(mode, returnedData))
+    .then(data => resolve(data.currentSeason))
     .catch(error => reject(error));
 });
 
@@ -162,7 +157,7 @@ const getPlayerLadders = (mode, player) => new Promise((resolve, reject) => {
  */
 const getPlayerMatches = player => new Promise((resolve, reject) => {
   getSc2PlayerData('matches', player)
-    .then(playerMatches => resolve(playerMatches))
+    .then(data => resolve(data))
     .catch(error => reject(error));
 });
 

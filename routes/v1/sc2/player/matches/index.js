@@ -11,23 +11,19 @@ const cache = require('../../../../../config/cache');
 const apicache = require('apicache').options({ debug: cache.debug }).middleware;
 const sc2playerApi = require('../../../../../api/starcraft2/player');
 
+const routePath = 'v1/sc2/player/matches';
+const playerPath = ':server/:id/:region/:name';
+
 /** Main route */
 router.get('/', apicache(cache.static), (req, res) => {
   res.json({
-    starcraft2_player_matches: `${config.siteUrl}/v1/sc2/player/matches/:server/:profileId/:profileRegion/:profileName`,
+    starcraft2_player_matches: `${config.siteUrl}/${routePath}/${playerPath}`,
   });
 });
 
 /** Route for selected player matches */
-router.get('/:server/:profileId/:profileRegion/:profileName', apicache(cache.request), (req, res) => {
-  const player = {
-    server: req.params.server,
-    id: req.params.profileId,
-    region: req.params.profileRegion,
-    name: req.params.profileName,
-  };
-
-  sc2playerApi.getPlayerMatches(player, res.json.bind(res));
+router.get(`/${playerPath}`, apicache(cache.request), (req, res) => {
+  sc2playerApi.getPlayerMatches(req.params, res.json.bind(res));
 });
 
 /** Default route for malformed requests */

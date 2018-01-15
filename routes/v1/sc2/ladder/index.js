@@ -11,10 +11,12 @@ const cache = require('../../../../config/cache');
 const apicache = require('apicache').options({ debug: cache.debug }).middleware;
 const sc2ladderApi = require('../../../../api/starcraft2/ladder');
 
+const routePath = 'v1/sc2/ladder';
+
 /** Main route */
 router.get('/', apicache(cache.static), (req, res) => {
   res.json({
-    sc2_ladder_data: `${config.siteUrl}/v1/sc2/ladder/:server/:ladderId`,
+    sc2_ladder_data: `${config.siteUrl}/${routePath}/:server/:ladderId`,
   });
 });
 
