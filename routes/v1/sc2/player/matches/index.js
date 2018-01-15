@@ -23,7 +23,9 @@ router.get('/', apicache(cache.static), (req, res) => {
 
 /** Route for selected player matches */
 router.get(`/${playerPath}`, apicache(cache.request), (req, res) => {
-  sc2playerApi.getPlayerMatches(req.params, res.json.bind(res));
+  sc2playerApi.getPlayerMatches(req.params)
+    .then(data => res.json(data))
+    .catch(error => res.json(error));
 });
 
 /** Default route for malformed requests */

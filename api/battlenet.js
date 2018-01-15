@@ -33,8 +33,8 @@ const getAccessTokenObject = (server) => {
 
   return new Promise((resolve, reject) => {
     fetch(accessTokenRequestUri)
-      .then((accessTokenData) => {
-        resolve(accessTokenData.json());
+      .then((data) => {
+        resolve(data.json());
       })
       .catch(error => reject(error));
   });
@@ -45,7 +45,7 @@ const getDataWithAccessToken = (accessToken, requestPath) => {
 
   return new Promise((resolve, reject) => {
     fetch(requestUri)
-      .then(authenticatedData => resolve(authenticatedData.json()))
+      .then(data => resolve(data.json()))
       .catch(error => reject(error));
   });
 };
@@ -65,7 +65,7 @@ const queryWithAccessToken = (server, requestPath) => new Promise((resolve, reje
       const authenticatedRequestPath = `${authenticatedRequestUri}${requestPath}`;
 
       getDataWithAccessToken(accessToken, authenticatedRequestPath)
-        .then(authenticatedData => resolve(authenticatedData))
+        .then(data => resolve(data))
         .catch(error => reject(error));
     })
     .catch(error => reject(error));

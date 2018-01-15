@@ -24,7 +24,9 @@ router.get('/', apicache(cache.static), (req, res) => {
 
 /** Route for player profile */
 router.get(`/${playerPath}`, apicache(cache.request), (req, res) => {
-  sc2playerApi.getPlayerProfile(req.params, res.json.bind(res));
+  sc2playerApi.getPlayerProfile(req.params)
+    .then(data => res.json(data))
+    .catch(error => res.json(error));
 });
 
 /** Default route for malformed requests */

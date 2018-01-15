@@ -50,7 +50,9 @@ router.get('/', apicache(cache.static), (req, res) => {
 router.get(`/:mode/:filter/${playerPath}`, apicache(cache.request), (req, res) => {
   const { mode, filter } = req.params;
 
-  sc2playerApi.getPlayerMMR(mode, filter, req.params, res.json.bind(res));
+  sc2playerApi.getPlayerMMR(mode, filter, req.params)
+    .then(data => res.json(data))
+    .catch(error => res.json(error));
 });
 
 /** Default route for malformed requests */

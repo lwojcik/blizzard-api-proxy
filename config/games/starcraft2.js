@@ -7,8 +7,6 @@
 
 const sc2Config = {};
 
-/** StarCraft 2 expansion names */
-sc2Config.expansions = ['WOL', 'HOTS', 'LOTV'];
 /** StarCraft 2 race names */
 sc2Config.races = ['ALL', 'RANDOM', 'TERRAN', 'ZERG', 'PROTOSS'];
 
