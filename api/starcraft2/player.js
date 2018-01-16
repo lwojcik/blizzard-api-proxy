@@ -45,7 +45,6 @@ const bnetApi = require('../../api/battlenet');
  * @function
  * @param {string} resource - Name of the resource to fetch.
  * @param {Object} player - Player object including server, id, region and name.
- * @param {function} callback - Callback function to pass the data to.
  */
 const getSc2PlayerData = (resource, player) => {
   const {
@@ -82,11 +81,11 @@ const getSc2PlayerData = (resource, player) => {
  * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const getPlayerProfile = (player, callback) => {
+const getPlayerProfile = player => new Promise((resolve, reject) => {
   getSc2PlayerData('profile', player)
-    .then(data => callback(data))
-    .catch(error => callback(error));
-};
+    .then(data => resolve(data))
+    .catch(error => reject(error));
+});
 
 /**
  * Filters ladder data based on matchmaking mode.
@@ -144,7 +143,8 @@ const filterLaddersByMode = (ladderData, mode) => {
  */
 const getPlayerLadders = (mode, player) => new Promise((resolve, reject) => {
   getSc2PlayerData('ladders', player)
-    .then(data => resolve(data.currentSeason))
+    .then(ladders => filterLaddersByMode(ladders, mode))
+    .then(filteredLadders => resolve(filteredLadders))
     .catch(error => reject(error));
 });
 
