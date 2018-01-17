@@ -11,7 +11,7 @@
 const bnetConfig = require('../../config/api/battlenet');
 const sc2Config = require('../../config/games/starcraft2');
 const bnetApi = require('../../api/battlenet');
-// const ladderApi = require('./ladder');
+const ladderApi = require('./ladder');
 
 /**
  * Player object validator.
@@ -171,6 +171,21 @@ const getPlayerMatches = player => new Promise((resolve, reject) => {
  */
 const extractLadderIds = ladderData => ladderData.map(ladder => ladder.ladderId);
 
+// const extractPlayerObjectFromLadder = (ladderObject, playerId) => {
+//   // console.log(playerId);
+//   return ladderObject;
+// };
+
+//   // memberList.forEach((member) => {
+//   //   if (member.character_link.id === playerId) {
+//   //     playerDataObject = ladderObject;
+//   //   }
+//   // });
+
+//   // return playerDataObject;
+
+// };
+
 /**
  * Extracts StarCraft 2 player data from ladder object.
  * @function
@@ -179,33 +194,19 @@ const extractLadderIds = ladderData => ladderData.map(ladder => ladder.ladderId)
  * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const extractPlayerDataByLadderId = (server, ladderIds) => ladderIds;
-// const ladderData = [];
-// let ladderCounter = 0;
+const extractLadderObjectsByIds = (server, playerId, ladderIds) => {
+  const getLadderObject = ladderId => new Promise((resolve, reject) => {
+    ladderApi.getAuthenticatedLadderData(server, ladderId)
+      .then(authenticatedLadderData => resolve(authenticatedLadderData))
+      .catch(error => reject(error));
+  });
 
-// return ladderIds;
+  const ladderObjects = ladderIds.map(ladderId => getLadderObject(ladderId));
 
-// ladderIds.forEach((ladderId) => {
-//   ladderApi.getAuthenticatedLadderData(server, ladderId)
-//     .then((ladderObject) => {
-//       const ladderLeaderboard = ladderObject.team;
-//       const leagueId = ladderObject.league.league_key.league_id;
-//       const playerRank = sc2Config.matchMaking.ranks[leagueId];
-//       const teamType = ladderObject.league.league_key.team_type;
-//       const teamTypeName = sc2Config.matchMaking.teamTypes[teamType];
-
-//       ladderData.push({
-//         ladderLeaderboard, leagueId, playerRank, teamType, teamTypeName,
-//       });
-
-//       ladderCounter += 1;
-//     });
-
-//   if (ladderCounter === ladderIds.length) {
-//     return ladderData;
-//   }
-// });
-// };
+  return Promise.all(ladderObjects)
+    .then(results => results)
+    .catch(error => error);
+};
 
 /**
  * Fetches StarCraft 2 player ladder data including MMR.
@@ -215,17 +216,27 @@ const extractPlayerDataByLadderId = (server, ladderIds) => ladderIds;
  * @param {Object} player - Player object including server, id, region and name.
  * @param {function} callback - Callback function to pass the data to.
  */
-const getPlayerMMR = (mode, filter, player, callback) => {
-  const { server } = player;
+const getPlayerMMR = (mode, filter, player) => {
+  const { server, id } = player;
 
-  getSc2PlayerData('ladders', player)
-    .then(playerLadders => filterLaddersByMode(playerLadders, mode))
-    .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
-    .then(extractedLadderIds => extractPlayerDataByLadderId(server, extractedLadderIds))
-    .then(extractedLadderData => callback(extractedLadderData))
-    // .then(extractedLadderObjects => callback(extractedLadderObjects))
-    // .then(data => callback(data))
-    .catch(error => callback(error));
+  return new Promise((resolve, reject) => {
+    getSc2PlayerData('ladders', player)
+      .then(playerLadders => filterLaddersByMode(playerLadders, mode))
+      .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
+      .then(extractedLadderIds => extractLadderObjectsByIds(server, id, extractedLadderIds))
+      // .then(extractedLadderObjects => extractPlayerObjectFromLadder(extractedLadderObjects, id))
+      .then(data => resolve(data))
+      .catch(error => reject(error));
+  });
+
+  // getSc2PlayerData('ladders', player)
+  //   .then(playerLadders => filterLaddersByMode(playerLadders, mode))
+  //   .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
+  //   .then(extractedLadderIds => extractPlayerDataByLadderId(server, extractedLadderIds))
+  //   .then(extractedLadderData => callback(extractedLadderData))
+  //   // .then(extractedLadderObjects => callback(extractedLadderObjects))
+  //   // .then(data => callback(data))
+  //   .catch(error => callback(error));
 
 //   // try {
 //   getSc2PlayerData('ladders', player)
