@@ -171,20 +171,19 @@ const getPlayerMatches = player => new Promise((resolve, reject) => {
  */
 const extractLadderIds = ladderData => ladderData.map(ladder => ladder.ladderId);
 
-// const extractPlayerObjectFromLadder = (ladderObject, playerId) => {
-//   // console.log(playerId);
-//   return ladderObject;
-// };
-
-//   // memberList.forEach((member) => {
-//   //   if (member.character_link.id === playerId) {
-//   //     playerDataObject = ladderObject;
-//   //   }
-//   // });
-
-//   // return playerDataObject;
-
-// };
+/**
+ * Fetches StarCraft 2 ladder data by provided id parameter.
+ * @function
+ * @param {Object} ladder - Ladder object.
+ * @param {string} filter - How much data should be returned ('ALL' - all, 'TOP' - top ladder only).
+ * @param {Object} player - Player object including server, id, region and name.
+ * @param {function} callback - Callback function to pass the data to.
+ */
+const getLadderObjectFromId = (server, ladderId) => new Promise((resolve, reject) => {
+  ladderApi.getAuthenticatedLadderData(server, ladderId)
+    .then(authenticatedLadderData => resolve(authenticatedLadderData))
+    .catch(error => reject(error));
+});
 
 /**
  * Extracts StarCraft 2 player data from ladder object.
@@ -195,18 +194,30 @@ const extractLadderIds = ladderData => ladderData.map(ladder => ladder.ladderId)
  * @param {function} callback - Callback function to pass the data to.
  */
 const extractLadderObjectsByIds = (server, playerId, ladderIds) => {
-  const getLadderObject = ladderId => new Promise((resolve, reject) => {
-    ladderApi.getAuthenticatedLadderData(server, ladderId)
-      .then(authenticatedLadderData => resolve(authenticatedLadderData))
-      .catch(error => reject(error));
-  });
-
-  const ladderObjects = ladderIds.map(ladderId => getLadderObject(ladderId));
+  const ladderObjects = ladderIds.map(ladderId => getLadderObjectFromId(server, ladderId));
 
   return Promise.all(ladderObjects)
     .then(results => results)
     .catch(error => error);
 };
+
+const extractPlayerObjectFromLadder = (ladderObjects, playerId) =>
+  ladderObjects.map((ladderObject) => {
+    const ladderLeaderboard = ladderObject.team;
+    const playerLadderObject = [];
+
+    ladderLeaderboard.forEach((playerDataObject) => {
+      const memberList = playerDataObject.member;
+
+      memberList.forEach((member) => {
+        if (member.character_link.id === Number(playerId)) {
+          playerLadderObject.push(playerDataObject);
+        }
+      });
+    });
+
+    return playerLadderObject;
+  });
 
 /**
  * Fetches StarCraft 2 player ladder data including MMR.
@@ -224,7 +235,7 @@ const getPlayerMMR = (mode, filter, player) => {
       .then(playerLadders => filterLaddersByMode(playerLadders, mode))
       .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
       .then(extractedLadderIds => extractLadderObjectsByIds(server, id, extractedLadderIds))
-      // .then(extractedLadderObjects => extractPlayerObjectFromLadder(extractedLadderObjects, id))
+      .then(extractedLadderObjects => extractPlayerObjectFromLadder(extractedLadderObjects, id))
       .then(data => resolve(data))
       .catch(error => reject(error));
   });
