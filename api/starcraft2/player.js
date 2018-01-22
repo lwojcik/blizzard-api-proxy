@@ -6,45 +6,17 @@
  * @since   2017-12-17
  */
 
-// const Joi = require('joi');
-
 const bnetConfig = require('../../config/api/battlenet');
 const sc2Config = require('../../config/games/starcraft2');
 const bnetApi = require('../../api/battlenet');
 const ladderApi = require('./ladder');
 
 /**
- * Player object validator.
- * @function
- * @param {Object} player - Player object including server, id, region and name.
- * @returns {(boolean|Object)} true if validation passed, error object if validation failed.
- */
-// const validatePlayerObject = (playerObject) => {
-//   const playerObjectSchema = Joi.object().keys({
-//     server: Joi.any().valid(bnetConfig.servers).required(),
-//     id: Joi.number().integer().positive().required(),
-//     region: Joi.number().integer().min(0).max(5)
-//       .required(),
-//     name: Joi.string().alphanum().max(12).required(),
-//   });
-
-//   const result = Joi.validate(playerObject, playerObjectSchema);
-
-//   if (result.error === null) {
-//     return true;
-//   }
-
-//   return {
-//     error: 'validation_failed',
-//     details: result.error.details,
-//   };
-// };
-
-/**
  * General method for fetching StarCraft 2 player data available with Battle.net API key.
  * @function
- * @param {string} resource - Name of the resource to fetch.
+ * @param {string} resource - Name of the Battle.net API resource to fetch.
  * @param {Object} player - Player object including server, id, region and name.
+ * @returns {Promise} Promise object representing player data.
  */
 const getSc2PlayerData = (resource, player) => {
   const {
@@ -52,9 +24,6 @@ const getSc2PlayerData = (resource, player) => {
   } = player;
 
   return new Promise((resolve, reject) => {
-    // const isPlayerObjectValid = validatePlayerObject(player);
-
-    // if (isPlayerObjectValid === true) {
     const serverUri = bnetConfig.api.url[server];
     const requestedResource = (resource === 'profile') ? '' : resource;
     const requestPath = `/sc2/profile/${id}/${region}/${name}/${requestedResource}`;
@@ -79,7 +48,7 @@ const getSc2PlayerData = (resource, player) => {
  * Fetches StarCraft 2 player profile.
  * @function
  * @param {Object} player - Player object including server, id, region and name.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {Promise} Promise object representing player profile.
  */
 const getPlayerProfile = player => new Promise((resolve, reject) => {
   getSc2PlayerData('profile', player)
@@ -92,7 +61,7 @@ const getPlayerProfile = player => new Promise((resolve, reject) => {
  * @function
  * @param {string} mode - Player matchmaking mode (e.g. 1v1).
  * @param {object} ladderData - Ladder data object returned by Blizzard API.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {Promise} Promise object representing ladders filtered by provided mode.
  */
 const filterLaddersByMode = (ladderData, mode) => {
   const laddersToBeReturned = mode.toUpperCase();
@@ -129,7 +98,7 @@ const filterLaddersByMode = (ladderData, mode) => {
  * Returns top player ladder by choosing one with the highest MMR.
  * @function
  * @param {object} ladderData - Ladder data object returned by Blizzard API.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {object} Object representing top ladder by MMR.
  */
 const selectTopLadder = (ladderObjects) => {
   const ladders = ladderObjects.map(ladderObject => ladderObject.data);
@@ -139,7 +108,9 @@ const selectTopLadder = (ladderObjects) => {
 /**
  * Fetches StarCraft 2 player ladders data.
  * @function
+ * @param {string} mode - Player matchmaking mode (e.g. 1v1).
  * @param {Object} player - Player object including server, id, region and name.
+ * @returns {Promise} Promise object representing player ladders.
  */
 const getPlayerLadders = (mode, player) => new Promise((resolve, reject) => {
   getSc2PlayerData('ladders', player)
@@ -151,9 +122,8 @@ const getPlayerLadders = (mode, player) => new Promise((resolve, reject) => {
 /**
  * Fetches StarCraft 2 player match history.
  * @function
- * @param {string} server - Server name abbreviation.
  * @param {Object} player - Player object including server, id, region and name.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {Promise} Promise object representing player matches.
  */
 const getPlayerMatches = player => new Promise((resolve, reject) => {
   getSc2PlayerData('matches', player)
@@ -164,20 +134,17 @@ const getPlayerMatches = player => new Promise((resolve, reject) => {
 /**
  * Extracts StarCraft 2 player data from ladder object.
  * @function
- * @param {Object} ladder - Ladder object.
- * @param {string} filter - How much data should be returned ('ALL' - all, 'TOP' - top ladder only).
- * @param {Object} player - Player object including server, id, region and name.
- * @param {function} callback - Callback function to pass the data to.
+ * @param {Array} ladderData - Array of player ladder objects.
+ * @returns {Array} Array of player objects fetched from provided ladders.
  */
 const extractLadderIds = ladderData => ladderData.map(ladder => ladder.ladderId);
 
 /**
  * Fetches StarCraft 2 ladder data by provided id parameter.
  * @function
- * @param {Object} ladder - Ladder object.
- * @param {string} filter - How much data should be returned ('ALL' - all, 'TOP' - top ladder only).
- * @param {Object} player - Player object including server, id, region and name.
- * @param {function} callback - Callback function to pass the data to.
+ * @param {String} server - Battle.net server to fetch the data from.
+ * @param {Number} ladderId - ID of the ladder to fetch.
+ * @returns {Promise} Promise object representing ladder data object.
  */
 const getLadderObjectById = (server, ladderId) => new Promise((resolve, reject) => {
   ladderApi.getAuthenticatedLadderData(server, ladderId)
@@ -190,14 +157,14 @@ const getLadderObjectById = (server, ladderId) => new Promise((resolve, reject) 
 });
 
 /**
- * Extracts StarCraft 2 player data from ladder object.
+ * Extracts array of ladder objects based on provided array of ladder IDs.
  * @function
- * @param {Object} ladder - Ladder object.
- * @param {string} filter - How much data should be returned ('ALL' - all, 'TOP' - top ladder only).
+ * @param {String} server - Battle.net server to fetch the data from.
+ * @param {string} playerId - Player I.
  * @param {Object} player - Player object including server, id, region and name.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {Promise} Promise object representing ladder objects.
  */
-const extractLadderObjectsByIds = (server, playerId, ladderIds) => {
+const extractLadderObjectsByIds = (server, ladderIds) => {
   const ladderObjects = ladderIds.map(ladderId => getLadderObjectById(server, ladderId));
 
   return Promise.all(ladderObjects)
@@ -229,6 +196,13 @@ const extractPlayerObjectsFromLadders = (ladderObjects, playerId) => {
   return extractedPlayerObjects;
 };
 
+/**
+ * Filters an array of player ladder objects based on provided filter.
+ * @function
+ * @param {Array} playerObjects - Player ladder objects.
+ * @param {string} filter - Filter to use ('ALL' for all ladders or 'TOP' for a single top ladder).
+ * @returns {Array|Object} Array of all ladder objects or single top ladder object.
+ */
 const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
   const filterType = filter.toUpperCase();
   let filteredPlayerObjects;
@@ -244,10 +218,6 @@ const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
   }
 
   return filteredPlayerObjects;
-  // return {
-  //   mode: filter,
-  //   data: playerObjects
-  // };
 };
 
 /**
@@ -256,7 +226,7 @@ const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
  * @param {string} mode - Player matchmaking mode (e.g. 1v1).
  * @param {string} filter - How much data should be returned ('ALL' - all, 'TOP' - top ladder only).
  * @param {Object} player - Player object including server, id, region and name.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {Promise} Promise object representing player data including MMR.
  */
 const getPlayerMMR = (mode, filter, player) => {
   const { server, id } = player;
@@ -265,7 +235,7 @@ const getPlayerMMR = (mode, filter, player) => {
     getSc2PlayerData('ladders', player)
       .then(playerLadders => filterLaddersByMode(playerLadders, mode))
       .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
-      .then(extractedLadderIds => extractLadderObjectsByIds(server, id, extractedLadderIds))
+      .then(extractedLadderIds => extractLadderObjectsByIds(server, extractedLadderIds))
       .then(extractedLadderObjects => extractPlayerObjectsFromLadders(extractedLadderObjects, id))
       .then(extractedPlayerData => filterPlayerObjectsByFilterType(extractedPlayerData, filter))
       .then(data => resolve(data))

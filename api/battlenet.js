@@ -24,6 +24,12 @@ const query = (requestUri) => {
   });
 };
 
+/**
+ * Returns access token object fetched from Battle.net API.
+ * @function
+ * @param {string} server - Battle.net API server to request data from.
+ * @returns {Promise} Promise object representing access token object fetched from Battle.net API.
+ */
 const getAccessTokenObject = (server) => {
   const clientId = bnetConfig.api.key;
   const clientSecret = bnetConfig.api.secret;
@@ -40,6 +46,13 @@ const getAccessTokenObject = (server) => {
   });
 };
 
+/**
+ * Fetches data from Battle.net API using provided access token.
+ * @function
+ * @param {string} accessToken - Battle.net API access token.
+ * @param {string} requestPath - API endpoint to request data from.
+ * @returns {Promise} Promise object representing data fetched from Battle.net API.
+ */
 const getDataWithAccessToken = (accessToken, requestPath) => {
   const requestUri = `${requestPath}?access_token=${accessToken}`;
 
@@ -55,7 +68,7 @@ const getDataWithAccessToken = (accessToken, requestPath) => {
  * @function
  * @param {string} server - server name abbreviation.
  * @param {string} requestPath - Path to request from.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {Promise} Promise object representing data fetched from Battle.net API.
  */
 const queryWithAccessToken = (server, requestPath) => new Promise((resolve, reject) => {
   getAccessTokenObject(server)

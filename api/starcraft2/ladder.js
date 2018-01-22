@@ -13,7 +13,7 @@ const bnetApi = require('../../api/battlenet');
  * @function
  * @param {string} server - Server name abbreviation.
  * @param {number} ladderId - Ladder identifier.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {Promise} Promise object representing ladder data.
  */
 const getLadderData = (server, ladderId) => {
   if (!bnetConfig.servers.includes(server)) {
@@ -37,7 +37,7 @@ const getLadderData = (server, ladderId) => {
  * @function
  * @param {string} server - Server name abbreviation..
  * @param {number} ladderId - Ladder identifier.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {Promise} Promise object representing ladder data from an authenticated endpoint.
  */
 const getAuthenticatedLadderData = (server, ladderId) => {
   if (!bnetConfig.servers.includes(server)) {
