@@ -5,62 +5,61 @@
  * @since   2017-12-17
  */
 
-const https = require('https');
+const fetch = require('node-fetch');
 const bnetConfig = require('../config/api/battlenet');
 
 /**
- * General method for fetching data from selected path of Battle.net endpoint.
+ * General method for fetching data from selected Battle.net endpoint.
  * @function
- * @param {string} requestUri - URL of the request server.
- * @param {string} requestPath - Path to request from.
- * @param {function} callback - Callback function to pass the data to.
+ * @param {string} requestUri - full URL to request from.
+ * @returns {Promise} A promise that returns Battle.net data if resolved and error if rejected.
  */
-const fetchDataFromBnet = (requestUri, requestPath, callback) => {
-  const requestOptions = {
-    hostname: requestUri,
-    port: bnetConfig.api.port,
-    path: requestPath,
-  };
+const query = (requestUri) => {
+  const bnetRequestUri = `${requestUri}?apikey=${bnetConfig.api.key}`;
 
-  const requestCallback = (response) => {
-    let stringResponse = '';
-
-    response.on('data', (chunk) => {
-      stringResponse += chunk;
-    });
-
-    response.on('error', (err) => {
-      callback(err);
-    });
-
-    response.on('end', () => {
-      const returnedData = JSON.parse(stringResponse);
-      callback(returnedData);
-    });
-  };
-
-  const request = https.get(requestOptions, requestCallback);
-
-  request.on('error', (err) => {
-    callback(err);
+  return new Promise((resolve, reject) => {
+    fetch(bnetRequestUri)
+      .then(data => resolve(data.json()))
+      .catch(error => reject(error));
   });
-
-  request.end();
 };
 
 /**
- * Performs API key authentication and fetches data from protected Battle.net endpoints.
+ * Returns access token object fetched from Battle.net API.
  * @function
- * @param {string} server - Server name abbreviation.
- * @param {string} requestPath - Path to request from.
- * @param {function} callback - Callback function to pass the data to.
+ * @param {string} server - Battle.net API server to request data from.
+ * @returns {Promise} Promise object representing access token object fetched from Battle.net API.
  */
-const queryWithApiKey = (server, requestPath, callback) => {
-  const requestUri = bnetConfig.api.url[server];
-  const requestPathWithApiKey = `${requestPath}?apikey=${bnetConfig.api.key}`;
+const getAccessTokenObject = (server) => {
+  const clientId = bnetConfig.api.key;
+  const clientSecret = bnetConfig.api.secret;
+  const accessTokenRequestServer = bnetConfig.getAccessTokenUri[server];
+  const accessTokenApiPath = `/oauth/token?grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`;
+  const accessTokenRequestUri = `${accessTokenRequestServer}${accessTokenApiPath}`;
 
-  fetchDataFromBnet(requestUri, requestPathWithApiKey, (returnedData) => {
-    callback(returnedData);
+  return new Promise((resolve, reject) => {
+    fetch(accessTokenRequestUri)
+      .then((data) => {
+        resolve(data.json());
+      })
+      .catch(error => reject(error));
+  });
+};
+
+/**
+ * Fetches data from Battle.net API using provided access token.
+ * @function
+ * @param {string} accessToken - Battle.net API access token.
+ * @param {string} requestPath - API endpoint to request data from.
+ * @returns {Promise} Promise object representing data fetched from Battle.net API.
+ */
+const getDataWithAccessToken = (accessToken, requestPath) => {
+  const requestUri = `${requestPath}?access_token=${accessToken}`;
+
+  return new Promise((resolve, reject) => {
+    fetch(requestUri)
+      .then(data => resolve(data.json()))
+      .catch(error => reject(error));
   });
 };
 
@@ -69,26 +68,23 @@ const queryWithApiKey = (server, requestPath, callback) => {
  * @function
  * @param {string} server - server name abbreviation.
  * @param {string} requestPath - Path to request from.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {Promise} Promise object representing data fetched from Battle.net API.
  */
-const queryWithAccessToken = (server, requestPath, callback) => {
-  const clientId = bnetConfig.api.key;
-  const clientSecret = bnetConfig.api.secret;
-  const accessTokenRequestServer = bnetConfig.getAccessTokenUri[server];
-  const accessTokenApiPath = `/oauth/token?grant_type=client_credentials&client_id=${clientId}&client_secret=${clientSecret}`;
+const queryWithAccessToken = (server, requestPath) => new Promise((resolve, reject) => {
+  getAccessTokenObject(server)
+    .then((accessTokenObject) => {
+      const accessToken = accessTokenObject.access_token;
+      const authenticatedRequestUri = bnetConfig.api.url[server];
+      const authenticatedRequestPath = `${authenticatedRequestUri}${requestPath}`;
 
-  fetchDataFromBnet(accessTokenRequestServer, accessTokenApiPath, (returnedData) => {
-    const accessToken = returnedData.access_token;
-    const authenticatedRequestUri = bnetConfig.api.url[server];
-    const authenticatedRequestPath = `${requestPath}?access_token=${accessToken}`;
-
-    fetchDataFromBnet(authenticatedRequestUri, authenticatedRequestPath, (authenticatedData) => {
-      callback(authenticatedData);
-    });
-  });
-};
+      getDataWithAccessToken(accessToken, authenticatedRequestPath)
+        .then(data => resolve(data))
+        .catch(error => reject(error));
+    })
+    .catch(error => reject(error));
+});
 
 module.exports = {
-  queryWithApiKey,
+  query,
   queryWithAccessToken,
 };

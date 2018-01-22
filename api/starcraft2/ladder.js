@@ -13,17 +13,23 @@ const bnetApi = require('../../api/battlenet');
  * @function
  * @param {string} server - Server name abbreviation.
  * @param {number} ladderId - Ladder identifier.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {Promise} Promise object representing ladder data.
  */
-const getLadderData = (server, ladderId, callback) => {
+const getLadderData = (server, ladderId) => {
   if (!bnetConfig.servers.includes(server)) {
-    callback({
+    return {
       error: `Wrong server (you provided: ${server}, available choices: ${bnetConfig.servers.join(', ')})`,
-    });
+    };
   }
 
-  const requestPath = `/sc2/ladder/${ladderId}`;
-  bnetApi.queryWithApiKey(server, requestPath, callback);
+  return new Promise((resolve, reject) => {
+    const requestServer = bnetConfig.api.url[server];
+    const requestUri = `${requestServer}/sc2/ladder/${ladderId}`;
+
+    bnetApi.query(requestUri)
+      .then(ladderData => resolve(ladderData))
+      .catch(error => reject(error));
+  });
 };
 
 /**
@@ -31,17 +37,21 @@ const getLadderData = (server, ladderId, callback) => {
  * @function
  * @param {string} server - Server name abbreviation..
  * @param {number} ladderId - Ladder identifier.
- * @param {function} callback - Callback function to pass the data to.
+ * @returns {Promise} Promise object representing ladder data from an authenticated endpoint.
  */
-const getAuthenticatedLadderData = (server, ladderId, callback) => {
+const getAuthenticatedLadderData = (server, ladderId) => {
   if (!bnetConfig.servers.includes(server)) {
-    callback({
+    return {
       error: `Wrong server (you provided: ${server}, available choices: ${bnetConfig.servers.join(', ')})`,
-    });
+    };
   }
+  return new Promise((resolve, reject) => {
+    const requestUri = `/data/sc2/ladder/${ladderId}`;
 
-  const requestPath = `/data/sc2/ladder/${ladderId}`;
-  bnetApi.queryWithAccessToken(server, requestPath, callback);
+    bnetApi.queryWithAccessToken(server, requestUri)
+      .then(ladderData => resolve(ladderData))
+      .catch(error => reject(error));
+  });
 };
 
 module.exports = {

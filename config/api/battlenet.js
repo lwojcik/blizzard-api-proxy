@@ -9,30 +9,23 @@ const { env } = process;
 
 const bnetApiConfig = {};
 
-/** Battle.net API base URL */
-bnetApiConfig.url = 'api.battle.net';
-/** Battle.net API port */
-bnetApiConfig.port = 443;
 /** Battle.net API server identifiers */
 bnetApiConfig.servers = ['eu', 'kr', 'sea', 'tw', 'us'];
-
-bnetApiConfig.oauth = {};
 
 bnetApiConfig.api = {};
 bnetApiConfig.api.url = {};
 /** Battle.net API URL for European region */
-bnetApiConfig.api.url.eu = 'eu.api.battle.net';
+bnetApiConfig.api.url.eu = 'https://eu.api.battle.net';
 /** Battle.net API URL for Korean region */
-bnetApiConfig.api.url.kr = 'kr.api.battle.net';
+bnetApiConfig.api.url.kr = 'https://kr.api.battle.net';
 /** Battle.net API URL for South-East Asia region */
-bnetApiConfig.api.url.sea = 'sea.api.battle.net';
+bnetApiConfig.api.url.sea = 'https://sea.api.battle.net';
 /** Battle.net API URL for Taiwanese region */
-bnetApiConfig.api.url.tw = 'tw.api.battle.net';
+bnetApiConfig.api.url.tw = 'https://tw.api.battle.net';
 /** Battle.net API URL for American region */
-bnetApiConfig.api.url.us = 'us.api.battle.net';
-
+bnetApiConfig.api.url.us = 'https://us.api.battle.net';
 /** Battle.net API URL to use in China */
-bnetApiConfig.api.urlCn = 'https://battlenet.com.cn';
+bnetApiConfig.api.url.cn = 'https://battlenet.com.cn';
 
 /** Battle.net API key */
 bnetApiConfig.api.key = env.API_BATTLENET_KEY;
@@ -46,17 +39,16 @@ bnetApiConfig.checkAccessUriCn = 'https://battlenet.com.cn/oauth/check_token?tok
 
 bnetApiConfig.getAccessTokenUri = {};
 /** Battle.net API URL for getting access token in European region */
-bnetApiConfig.getAccessTokenUri.eu = 'eu.battle.net';
+bnetApiConfig.getAccessTokenUri.eu = 'https://eu.battle.net';
 /** Battle.net API URL for getting access token in Korean region */
-bnetApiConfig.getAccessTokenUri.kr = 'kr.battle.net';
+bnetApiConfig.getAccessTokenUri.kr = 'https://kr.battle.net';
 /** Battle.net API URL for getting access token in South-East Asia region */
-bnetApiConfig.getAccessTokenUri.sea = 'sea.battle.net';
+bnetApiConfig.getAccessTokenUri.sea = 'https://sea.battle.net';
 /** Battle.net API URL for getting access token in Taiwanese region */
-bnetApiConfig.getAccessTokenUri.tw = 'tw.battle.net';
+bnetApiConfig.getAccessTokenUri.tw = 'https://tw.battle.net';
 /** Battle.net API URL for getting access token in American region */
-bnetApiConfig.getAccessTokenUri.us = 'us.battle.net';
-
+bnetApiConfig.getAccessTokenUri.us = 'https://us.battle.net';
 /** Battle.net API URL for getting access token from China */
-bnetApiConfig.getAccessTokenUriCn = 'https://www.battlenet.com.cn';
+bnetApiConfig.getAccessTokenUri.cn = 'https://www.battlenet.com.cn';
 
 module.exports = bnetApiConfig;
