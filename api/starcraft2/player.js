@@ -131,10 +131,10 @@ const filterLaddersByMode = (ladderData, mode) => {
  * @param {object} ladderData - Ladder data object returned by Blizzard API.
  * @param {function} callback - Callback function to pass the data to.
  */
-// const selectTopLadder = (ladderData) => {
-//   const ladders = ladderData.data;
-//   return ladders.sort((a, b) => a.data.rating - b.data.rating)[ladders.length - 1];
-// };
+const selectTopLadder = (ladderObjects) => {
+  const ladders = ladderObjects.map(ladderObject => ladderObject.data);
+  return ladders.sort((a, b) => a.rating - b.rating)[ladders.length - 1];
+};
 
 /**
  * Fetches StarCraft 2 player ladders data.
@@ -237,10 +237,10 @@ const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
       filteredPlayerObjects = playerObjects;
       break;
     case 'TOP':
-      filteredPlayerObjects = playerObjects;
+      filteredPlayerObjects = selectTopLadder(playerObjects);
       break;
     default:
-      filteredPlayerObjects = { error: 'Wrong filter type provided' };
+      filteredPlayerObjects = { error: 'Wrong filter type provided (expected \'all\' or \'top\')' };
   }
 
   return filteredPlayerObjects;
