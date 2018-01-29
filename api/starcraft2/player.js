@@ -9,7 +9,7 @@
 const bnetConfig = require('../../config/api/battlenet');
 const sc2Config = require('../../config/games/starcraft2');
 const bnetApi = require('../../api/battlenet');
-const ladderApi = require('./ladder');
+// const ladderApi = require('./ladder');
 
 /**
  * General method for fetching StarCraft 2 player data available with Battle.net API key.
@@ -100,10 +100,10 @@ const filterLaddersByMode = (ladderData, mode) => {
  * @param {object} ladderData - Ladder data object returned by Blizzard API.
  * @returns {object} Object representing top ladder by MMR.
  */
-const selectTopLadder = (ladderObjects) => {
-  const ladders = ladderObjects.map(ladderObject => ladderObject.data);
-  return ladders.sort((a, b) => a.rating - b.rating)[ladders.length - 1];
-};
+// const selectTopLadder = (ladderObjects) => {
+//   const ladders = ladderObjects.map(ladderObject => ladderObject.data);
+//   return ladders.sort((a, b) => a.rating - b.rating)[ladders.length - 1];
+// };
 
 /**
  * Fetches StarCraft 2 player ladders data.
@@ -137,7 +137,13 @@ const getPlayerMatches = player => new Promise((resolve, reject) => {
  * @param {Array} ladderData - Array of player ladder objects.
  * @returns {Array} Array of player objects fetched from provided ladders.
  */
-const extractLadderIds = ladderData => ladderData.map(ladder => ladder.ladderId);
+// const extractLadderIdsAndRanks = ladderData => ladderData.map((ladder) => {
+//   const ladderObject = {
+//     ladderId: ladder.ladderId,
+//     rank: ladder.rank,
+//   };
+//   return ladderObject;
+// });
 
 /**
  * Fetches StarCraft 2 ladder data by provided id parameter.
@@ -146,15 +152,15 @@ const extractLadderIds = ladderData => ladderData.map(ladder => ladder.ladderId)
  * @param {Number} ladderId - ID of the ladder to fetch.
  * @returns {Promise} Promise object representing ladder data object.
  */
-const getLadderObjectById = (server, ladderId) => new Promise((resolve, reject) => {
-  ladderApi.getAuthenticatedLadderData(server, ladderId)
-    .then(authenticatedLadderData => resolve({
-      ladderId,
-      leagueInfo: authenticatedLadderData.league.league_key,
-      data: authenticatedLadderData,
-    }))
-    .catch(error => reject(error));
-});
+// const getLadderObjectById = (server, ladderId) => new Promise((resolve, reject) => {
+//   ladderApi.getAuthenticatedLadderData(server, ladderId)
+//     .then(authenticatedLadderData => resolve({
+//       ladderId,
+//       leagueInfo: authenticatedLadderData.league.league_key,
+//       data: authenticatedLadderData,
+//     }))
+//     .catch(error => reject(error));
+// });
 
 /**
  * Extracts array of ladder objects based on provided array of ladder IDs.
@@ -164,37 +170,38 @@ const getLadderObjectById = (server, ladderId) => new Promise((resolve, reject) 
  * @param {Object} player - Player object including server, id, region and name.
  * @returns {Promise} Promise object representing ladder objects.
  */
-const extractLadderObjectsByIds = (server, ladderIds) => {
-  const ladderObjects = ladderIds.map(ladderId => getLadderObjectById(server, ladderId));
+// const extractLadderObjectsByIdsAndRanks = (server, ladderIds) => {
+//   const ladderObjects =
+// ladderIds.map(ladder => getLadderObjectByIdAndRank(server, ladder.ladderId, ladder.rank));
 
-  return Promise.all(ladderObjects)
-    .then(results => results)
-    .catch(error => error);
-};
+//   return Promise.all(ladderObjects)
+//     .then(results => results)
+//     .catch(error => error);
+// };
 
-const extractPlayerObjectsFromLadders = (ladderObjects, playerId) => {
-  const extractedPlayerObjects = [];
+// const extractPlayerObjectsFromLadders = (ladderObjects, playerId) => {
+//   const extractedPlayerObjects = [];
 
-  ladderObjects.forEach((ladderObject) => {
-    const ladderData = ladderObject.data.team;
+//   ladderObjects.forEach((ladderObject) => {
+//     const ladderData = ladderObject.data.team;
 
-    ladderData.forEach((playerDataObject) => {
-      const memberList = playerDataObject.member;
+//     ladderData.forEach((playerDataObject) => {
+//       const memberList = playerDataObject.member;
 
-      memberList.forEach((member) => {
-        if (member.character_link.id === Number(playerId)) {
-          extractedPlayerObjects.push({
-            ladderId: ladderObject.ladderId,
-            leagueInfo: ladderObject.leagueInfo,
-            data: playerDataObject,
-          });
-        }
-      });
-    });
-  });
+//       memberList.forEach((member) => {
+//         if (member.character_link.id === Number(playerId)) {
+//           extractedPlayerObjects.push({
+//             ladderId: ladderObject.ladderId,
+//             leagueInfo: ladderObject.leagueInfo,
+//             data: playerDataObject,
+//           });
+//         }
+//       });
+//     });
+//   });
 
-  return extractedPlayerObjects;
-};
+//   return extractedPlayerObjects;
+// };
 
 /**
  * Filters an array of player ladder objects based on provided filter.
@@ -203,22 +210,47 @@ const extractPlayerObjectsFromLadders = (ladderObjects, playerId) => {
  * @param {string} filter - Filter to use ('ALL' for all ladders or 'TOP' for a single top ladder).
  * @returns {Array|Object} Array of all ladder objects or single top ladder object.
  */
-const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
-  const filterType = filter.toUpperCase();
-  let filteredPlayerObjects;
-  switch (filterType) {
-    case 'ALL':
-      filteredPlayerObjects = playerObjects;
-      break;
-    case 'TOP':
-      filteredPlayerObjects = selectTopLadder(playerObjects);
-      break;
-    default:
-      filteredPlayerObjects = { error: 'Wrong filter type provided (expected \'all\' or \'top\')' };
-  }
+// const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
+//   const filterType = filter.toUpperCase();
+//   let filteredPlayerObjects;
+//   switch (filterType) {
+//     case 'ALL':
+//       filteredPlayerObjects = playerObjects;
+//       break;
+//     case 'TOP':
+//       filteredPlayerObjects = selectTopLadder(playerObjects);
+//       break;
+//     default:
+//       filteredPlayerObjects = {
+//    error: 'Wrong filter type provided (expected \'all\' or \'top\')' };
+//   }
 
-  return filteredPlayerObjects;
-};
+//   return filteredPlayerObjects;
+// };
+
+// const extractPlayerDataFromLadderObject = (ladderObject, rank) => {
+//   // console.log(ladderObject);
+//   // console.log(rank);
+//   // FIXME
+// };
+
+// const getPlayerObjectFromLadder = (ladderId, rank) => new Promise((resolve, reject) => {
+//   getLadderObjectById(ladderId)
+//     // .then(ladderObject => extractPlayerDataFromLadderObject(ladderObject, rank))
+//     .then(data => resolve(data))
+//     .catch(error => reject(error));
+// });
+
+// const getPlayerLaddersData = (ladderObjects) => {
+//   const laddersData = ladderObjects.map(ladderObject =>
+//     getPlayerObjectFromLadder(ladderObject.ladderId, ladderObject.rank)
+//       .then(data => data)
+//       .catch(error => error));
+
+//   return Promise.all(laddersData)
+//     .then(data => data)
+//     .catch(error => error);
+// };
 
 /**
  * Fetches StarCraft 2 player ladder data including MMR.
@@ -228,16 +260,15 @@ const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
  * @param {Object} player - Player object including server, id, region and name.
  * @returns {Promise} Promise object representing player data including MMR.
  */
-const getPlayerMMR = (mode, filter, player) => {
-  const { server, id } = player;
-
+const getPlayerMMR = (mode, filter, player) => { // eslint-disable-line
+  // const { server, id } = player;
+  // FIXME
   return new Promise((resolve, reject) => {
-    getSc2PlayerData('ladders', player)
-      .then(playerLadders => filterLaddersByMode(playerLadders, mode))
-      .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
-      .then(extractedLadderIds => extractLadderObjectsByIds(server, extractedLadderIds))
-      .then(extractedLadderObjects => extractPlayerObjectsFromLadders(extractedLadderObjects, id))
-      .then(extractedPlayerData => filterPlayerObjectsByFilterType(extractedPlayerData, filter))
+    getPlayerLadders(mode, player)
+      // .then(filteredPlayerLadders => getPlayerLaddersData(filteredPlayerLadders))
+      // .then(extractedLadderIdsAndRanks =>
+      //      extractLadderObjectsByIdsAndRanks(server, extractedLadderIds))
+      // .then(extractedPlayerData => filterPlayerObjectsByFilterType(extractedPlayerData, filter))
       .then(data => resolve(data))
       .catch(error => reject(error));
   });
