@@ -16,45 +16,54 @@ const ladderApi = require('./ladder');
  * @function
  * @param {string} resource - Name of the Battle.net API resource to fetch.
  * @param {Object} player - Player object including server, id, region and name.
- * @returns {Promise} Promise object representing player data.
+ * @returns {Object} Player data object.
  */
-const getSc2PlayerData = (resource, player) => {
-  const {
-    server, id, region, name // eslint-disable-line comma-dangle
-  } = player;
+const getSc2PlayerData = async (resource, player) => {
+  try {
+    const {
+      server, id, region, name // eslint-disable-line comma-dangle
+    } = player;
 
-  return new Promise((resolve, reject) => {
-    const serverUri = bnetConfig.api.url[server];
-    const requestedResource = (resource === 'profile') ? '' : resource;
-    const requestPath = `/sc2/profile/${id}/${region}/${name}/${requestedResource}`;
-    const requestUri = `${serverUri}${requestPath}`;
+    const playerData = await new Promise((resolve, reject) => {
+      const serverUri = bnetConfig.api.url[server];
+      const requestedResource = (resource === 'profile') ? '' : resource;
+      const requestPath = `/sc2/profile/${id}/${region}/${name}/${requestedResource}`;
+      const requestUri = `${serverUri}${requestPath}`;
 
-    bnetApi.query(requestUri)
-      .then((data) => {
-        if (data.status === 'nok') {
-          resolve({
-            error: 'battlenet_api_error',
-            details: data,
-          });
-        } else {
-          resolve(data);
-        }
-      })
-      .catch(error => reject(error));
-  });
+      bnetApi.query(requestUri)
+        .then((data) => {
+          if (data.status === 'nok') {
+            resolve({
+              error: 'battlenet_api_error',
+              details: data,
+            });
+          } else {
+            resolve(data);
+          }
+        })
+        .catch(error => reject(error));
+    });
+
+    return playerData;
+  } catch (error) {
+    return error;
+  }
 };
 
 /**
  * Fetches StarCraft 2 player profile.
  * @function
  * @param {Object} player - Player object including server, id, region and name.
- * @returns {Promise} Promise object representing player profile.
+ * @returns {Object} Player profile object.
  */
-const getPlayerProfile = player => new Promise((resolve, reject) => {
-  getSc2PlayerData('profile', player)
-    .then(data => resolve(data))
-    .catch(error => reject(error));
-});
+const getPlayerProfile = async (player) => {
+  try {
+    const data = await getSc2PlayerData('profile', player);
+    return data;
+  } catch (error) {
+    return error;
+  }
+};
 
 /**
  * Filters ladder data based on matchmaking mode.
