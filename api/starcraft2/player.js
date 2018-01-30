@@ -157,11 +157,10 @@ const getLadderObjectById = (server, ladderId) => new Promise((resolve, reject) 
 });
 
 /**
- * Extracts array of ladder objects based on provided array of ladder IDs.
+ * Extracts array of ladder objects based on provided array of ladder ids.
  * @function
  * @param {String} server - Battle.net server to fetch the data from.
- * @param {string} playerId - Player I.
- * @param {Object} player - Player object including server, id, region and name.
+ * @param {string} ladderIds - array of ladder IDs.
  * @returns {Promise} Promise object representing ladder objects.
  */
 const extractLadderObjectsByIds = (server, ladderIds) => {
@@ -172,6 +171,13 @@ const extractLadderObjectsByIds = (server, ladderIds) => {
     .catch(error => error);
 };
 
+/**
+ * Extracts player data by their ID from provided ladder objects array.
+ * @function
+ * @param {String} ladderObjects - array of ladder objects.
+ * @param {string} playerId - player ID.
+ * @returns {Object} Array of player data objects.
+ */
 const extractPlayerObjectsFromLadders = (ladderObjects, playerId) => {
   const extractedPlayerObjects = [];
 
@@ -221,6 +227,16 @@ const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
 };
 
 /**
+ * Removes duplicates from ladder ids array in case player
+ * has more than one profile in a single division.
+ * @function
+ * @param {Array} playerObjects - Player ladder objects.
+ * @param {string} filter - Filter to use ('ALL' for all ladders or 'TOP' for a single top ladder).
+ * @returns {Array} Array of unique ladder ids.
+ */
+const dedupeLadderIds = ladderIds => Array.from(new Set(ladderIds));
+
+/**
  * Fetches StarCraft 2 player ladder data including MMR.
  * @function
  * @param {string} mode - Player matchmaking mode (e.g. 1v1).
@@ -235,7 +251,8 @@ const getPlayerMMR = (mode, filter, player) => {
     getSc2PlayerData('ladders', player)
       .then(playerLadders => filterLaddersByMode(playerLadders, mode))
       .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
-      .then(extractedLadderIds => extractLadderObjectsByIds(server, extractedLadderIds))
+      .then(filteredLadderIds => dedupeLadderIds(filteredLadderIds))
+      .then(uniqueFilteredLadderIds => extractLadderObjectsByIds(server, uniqueFilteredLadderIds))
       .then(extractedLadderObjects => extractPlayerObjectsFromLadders(extractedLadderObjects, id))
       .then(extractedPlayerData => filterPlayerObjectsByFilterType(extractedPlayerData, filter))
       .then(data => resolve(data))
