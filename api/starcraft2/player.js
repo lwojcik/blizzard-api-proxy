@@ -244,20 +244,21 @@ const dedupeLadderIds = ladderIds => Array.from(new Set(ladderIds));
  * @param {Object} player - Player object including server, id, region and name.
  * @returns {Promise} Promise object representing player data including MMR.
  */
-const getPlayerMMR = (mode, filter, player) => {
-  const { server, id } = player;
+const getPlayerMMR = async (mode, filter, player) => {
+  try {
+    const { server, id } = player;
 
-  return new Promise((resolve, reject) => {
-    getSc2PlayerData('ladders', player)
-      .then(playerLadders => filterLaddersByMode(playerLadders, mode))
-      .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
-      .then(filteredLadderIds => dedupeLadderIds(filteredLadderIds))
-      .then(uniqueFilteredLadderIds => extractLadderObjectsByIds(server, uniqueFilteredLadderIds))
-      .then(extractedLadderObjects => extractPlayerObjectsFromLadders(extractedLadderObjects, id))
-      .then(extractedPlayerData => filterPlayerObjectsByFilterType(extractedPlayerData, filter))
-      .then(data => resolve(data))
-      .catch(error => reject(error));
-  });
+    const playerLadders = await getSc2PlayerData('ladders', player);
+    const filteredPlayerLadders = await filterLaddersByMode(playerLadders, mode);
+    const filteredLadderIds = await extractLadderIds(filteredPlayerLadders);
+    const uniqueFilteredLadderIds = dedupeLadderIds(filteredLadderIds);
+    const extractedLadderObjects = await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
+    const extractedPlayerData = await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
+    const playerMMRobject = await filterPlayerObjectsByFilterType(extractedPlayerData, filter);
+    return playerMMRobject;
+  } catch (error) {
+    return error;
+  }
 };
 
 module.exports = {
