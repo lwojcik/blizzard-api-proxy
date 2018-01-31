@@ -8,7 +8,7 @@
 
 Node.js wrapper to Battle.net API and selected Blizzard games. Handling endpoint access, authentication, caching and some data manipulation procedures so that other apps of mine don't have to handle that themselves.
 
-# Requirements:
+# Requirements
 
 * Node.js 8.9.3 LTS or later
 
