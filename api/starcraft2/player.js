@@ -229,7 +229,7 @@ const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
       filteredPlayerObjects = selectTopLadder(playerObjects);
       break;
     default:
-      filteredPlayerObjects = { error: 'Wrong filter type provided (expected \'all\' or \'top\')' };
+      filteredPlayerObjects = { error: 'Wrong filter type provided (expected \'all\', \'top\' or \'sum\')' };
   }
 
   return filteredPlayerObjects;
@@ -240,33 +240,96 @@ const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
  * has more than one profile in a single division.
  * @function
  * @param {Array} playerObjects - Player ladder objects.
- * @param {string} filter - Filter to use ('ALL' for all ladders or 'TOP' for a single top ladder).
+ * @param {string} filter - Filter to use ('ALL' for all ladders, 'TOP' for a single top ladder or
+ * 'TOP' for ladder summary).
  * @returns {Array} Array of unique ladder ids.
  */
 const dedupeLadderIds = ladderIds => Array.from(new Set(ladderIds));
 
 /**
+ * Return ladder summary based on provided ladder data
+ * @function
+ * @param {Array} playerData - Player data object.
+ * @returns {Object} Ladder summary object.
+ */
+const prepareLadderSummary = (playerData) => {
+  const ladderSummaryObject = {
+    totalLadders: 0,
+    topMMR: 0,
+    wins: 0,
+    losses: 0,
+    ties: 0,
+  };
+
+  playerData.forEach((ladderObject) => {
+    ladderSummaryObject.totalLadders += 1;
+    ladderSummaryObject.topMMR =
+      ladderObject.data.rating > ladderSummaryObject.topMMR ?
+        ladderObject.data.rating : ladderSummaryObject.topMMR;
+    ladderSummaryObject.wins += ladderObject.data.wins;
+    ladderSummaryObject.losses += ladderObject.data.losses;
+    ladderSummaryObject.ties += ladderObject.data.ties;
+  });
+
+  return ladderSummaryObject;
+};
+
+/**
+ * Returns the summary of player ladders.
+ * @function
+ * @param {string} mode - Player matchmaking mode (e.g. 1v1).
+ * @param {Object} player - Player object including server, id, region and name.
+ * @returns {Promise} Promise object representing player data including MMR.
+ */
+const getPlayerLadderSummary = (mode, player) => new Promise((resolve, reject) => {
+  const { server, id } = player;
+
+  getSc2PlayerData('ladders', player)
+    .then(playerLadders => filterLaddersByMode(playerLadders, mode))
+    .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
+    .then(filteredLadderIds => dedupeLadderIds(filteredLadderIds))
+    .then(uniqueFilteredLadderIds =>
+      extractLadderObjectsByIds(server, uniqueFilteredLadderIds))
+    .then(extractedLadderObjects =>
+      extractPlayerObjectsFromLadders(extractedLadderObjects, id))
+    .then(extractedPlayerData => prepareLadderSummary(extractedPlayerData))
+    .then(data => resolve(data))
+    .catch(error => reject(error));
+});
+
+/**
  * Fetches StarCraft 2 player ladder data including MMR.
  * @function
  * @param {string} mode - Player matchmaking mode (e.g. 1v1).
- * @param {string} filter - How much data should be returned ('ALL' - all, 'TOP' - top ladder only).
+ * @param {string} filter - How much data should be returned ('ALL' - all, 'TOP' - top ladder,
+ * 'SUM' - summary).
  * @param {Object} player - Player object including server, id, region and name.
  * @returns {Promise} Promise object representing player data including MMR.
  */
 const getPlayerMMR = async (mode, filter, player) => {
-  try {
-    const { server, id } = player;
+  const { server, id } = player;
 
-    const playerLadders = await getSc2PlayerData('ladders', player);
-    const filteredPlayerLadders = await filterLaddersByMode(playerLadders, mode);
-    const filteredLadderIds = await extractLadderIds(filteredPlayerLadders);
-    const uniqueFilteredLadderIds = dedupeLadderIds(filteredLadderIds);
-    const extractedLadderObjects = await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
-    const extractedPlayerData = await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
-    const playerMMRobject = await filterPlayerObjectsByFilterType(extractedPlayerData, filter);
-    return playerMMRobject;
-  } catch (error) {
-    return error;
+  switch (filter.toUpperCase()) {
+    case 'SUM':
+      return new Promise((resolve, reject) => {
+        getPlayerLadderSummary(mode, player)
+          .then(data => resolve(data))
+          .catch(error => reject(error));
+      });
+    default:
+      return new Promise((resolve, reject) => {
+        getSc2PlayerData('ladders', player)
+          .then(playerLadders => filterLaddersByMode(playerLadders, mode))
+          .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
+          .then(filteredLadderIds => dedupeLadderIds(filteredLadderIds))
+          .then(uniqueFilteredLadderIds =>
+            extractLadderObjectsByIds(server, uniqueFilteredLadderIds))
+          .then(extractedLadderObjects =>
+            extractPlayerObjectsFromLadders(extractedLadderObjects, id))
+          .then(extractedPlayerData => filterPlayerObjectsByFilterType(extractedPlayerData, filter))
+          .then(data => resolve(data))
+          .catch(error => reject(error));
+      });
   }
 };
 
