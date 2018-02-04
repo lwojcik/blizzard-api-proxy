@@ -32,7 +32,7 @@ Node.js wrapper to Battle.net API and selected Blizzard games. Handling endpoint
 
 * ~~Proper documentation :)~~ Turning it into npm library with proper docs and examples of usage
 * Key-based authentication (e.g. parsing Blizzard API key provided via URL parameter)
-* Caching access token locally to cut the number of requests to Battle.net API
+* ~~Caching access token locally to cut the number of requests to Battle.net API~~
 * Basic test coverage
 
 # License
