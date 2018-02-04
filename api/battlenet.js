@@ -29,7 +29,7 @@ const query = async (requestUri) => {
  * @param {string} server - Battle.net API server to request data from.
  * @returns {Promise} Promise object representing access token object fetched from Battle.net API.
  */
-const getAccessTokenObject = async (server) => {
+const getAccessTokenObjectFromBattleNet = async (server) => {
   const clientId = bnetConfig.api.key;
   const clientSecret = bnetConfig.api.secret;
   const accessTokenRequestServer = bnetConfig.getAccessTokenUri[server];
@@ -43,6 +43,8 @@ const getAccessTokenObject = async (server) => {
     return error;
   }
 };
+
+const getAccessTokenObject = server => getAccessTokenObjectFromBattleNet(server);
 
 /**
  * Fetches data from Battle.net API using provided access token.
