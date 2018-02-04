@@ -74,9 +74,7 @@ const filterLaddersByMode = async (ladderData, mode) => {
   try {
     const filteredLadders = [];
 
-    if (ladderData.error) {
-      return ladderData;
-    }
+    if (ladderData.error) return ladderData;
 
     ladders.forEach((ladderObject) => {
       const ladder = ladderObject.ladder[0];
