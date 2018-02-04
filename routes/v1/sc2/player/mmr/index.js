@@ -55,13 +55,10 @@ router.get('/', apicache(cache.static), (req, res) => {
 /** Route for MMR from selected player ladder */
 router.get(`/:mode/:filter/${playerPath}`, apicache(cache.request), (req, res) => {
   const { mode, filter } = req.params;
-  if (mode.toUpperCase() === 'ALL' && filter.toUpperCase() === 'SUM') {
-    res.json({ error: 'That filter and mode combo is not supported yet. Use a game mode (e.g. 1v1) with \'SUM\'' });
-  } else {
-    sc2playerApi.getPlayerMMR(mode, filter, req.params)
-      .then(data => res.json(data))
-      .catch(error => res.json(error));
-  }
+
+  sc2playerApi.getPlayerMMR(mode, filter, req.params)
+    .then(data => res.json(data))
+    .catch(error => res.json(error));
 });
 
 /** Default route for malformed requests */

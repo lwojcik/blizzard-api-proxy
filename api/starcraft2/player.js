@@ -97,10 +97,10 @@ const filterLaddersByMode = async (ladderData, mode) => {
  * @param {object} ladderData - Ladder data object returned by Blizzard API.
  * @returns {object} Object representing top ladder by MMR.
  */
-const selectTopLadder = (ladderObjects) => {
-  const ladders = ladderObjects.map(ladderObject => ladderObject.data);
-  return ladders.sort((a, b) => a.rating - b.rating)[ladders.length - 1];
-};
+// const selectTopLadder = (ladderObjects) => {
+//   const ladders = ladderObjects.map(ladderObject => ladderObject.data);
+//   return ladders.sort((a, b) => a.rating - b.rating)[ladders.length - 1];
+// };
 
 /**
  * Fetches StarCraft 2 player ladders data.
@@ -208,19 +208,19 @@ const extractPlayerObjectsFromLadders = (ladderObjects, playerId) => {
  * @param {string} filter - Filter to use ('ALL' for all ladders or 'TOP' for a single top ladder).
  * @returns {Array|Object} Array of all ladder objects or single top ladder object.
  */
-const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
-  const filterType = filter.toUpperCase();
-  switch (filterType) {
-    case 'ALL':
-      return playerObjects;
-    case 'TOP':
-      return selectTopLadder(playerObjects);
-    default:
-      return {
-        error: 'Wrong filter type provided (expected \'all\', \'top\' or \'sum\')',
-      };
-  }
-};
+// const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
+//   const filterType = filter.toUpperCase();
+//   switch (filterType) {
+//     case 'ALL':
+//       return playerObjects;
+//     case 'TOP':
+//       return selectTopLadder(playerObjects);
+//     default:
+//       return {
+//         error: 'Wrong filter type provided (expected \'all\', \'top\' or \'sum\')',
+//       };
+//   }
+// };
 
 /**
  * Removes duplicates from ladder ids array in case player
@@ -233,13 +233,7 @@ const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
  */
 const dedupeLadderIds = ladderIds => Array.from(new Set(ladderIds));
 
-/**
- * Return ladder summary based on provided ladder data
- * @function
- * @param {Array} playerData - Player data object.
- * @returns {Object} Ladder summary object.
- */
-const prepareLadderSummary = (playerData) => {
+const prepareSingleLadderSummary = (playerData) => {
   const ladderSummaryObject = {
     totalLadders: 0,
     topMMR: 0,
@@ -261,26 +255,38 @@ const prepareLadderSummary = (playerData) => {
   return ladderSummaryObject;
 };
 
+const prepareAllLaddersSummary = (playerData) => {
+  const allLadders = [201, 206, 202, 203, 204]; // via https://us.battle.net/forums/en/sc2/topic/20749724960
+
+  const unprocessedLadderData = [];
+  const allLaddersData = [];
+  // let counter = 0;
+  allLadders.forEach(ladderCode =>
+    unprocessedLadderData
+      .push(playerData.map(playerDataObject => // eslint-disable-line no-confusing-arrow
+        playerDataObject.leagueInfo.queue_id === ladderCode ? playerDataObject : null)));
+
+  unprocessedLadderData.forEach((ladderDataObject) => {
+    const singleLadderSummary = prepareSingleLadderSummary(ladderDataObject);
+    allLaddersData.push(singleLadderSummary);
+    // counter += 1;
+  });
+
+  return allLaddersData;
+};
+
 /**
- * Returns the summary of player ladders.
+ * Return ladder summary based on provided ladder data
  * @function
- * @param {string} mode - Player matchmaking mode (e.g. 1v1).
- * @param {Object} player - Player object including server, id, region and name.
- * @returns {Promise} Promise object representing player data including MMR.
+ * @param {Array} playerData - Player data object.
+ * @returns {Object} Ladder summary object.
  */
-const getPlayerLadderSummary = async (mode, player) => {
-  try {
-    const { server, id } = player;
-    const playerLadders = await getSc2PlayerData('ladders', player);
-    const filteredPlayerLadders = await filterLaddersByMode(playerLadders, mode);
-    const filteredLadderIds = await extractLadderIds(filteredPlayerLadders);
-    const uniqueFilteredLadderIds = await dedupeLadderIds(filteredLadderIds);
-    const extractedLadderObjects = await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
-    const extractedPlayerData = await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
-    const data = await prepareLadderSummary(extractedPlayerData);
-    return data;
-  } catch (error) {
-    return error;
+const prepareLadderSummary = async (playerData, mode) => {
+  switch (mode.toUpperCase()) {
+    case 'ALL':
+      return prepareAllLaddersSummary(playerData);
+    default:
+      return prepareSingleLadderSummary(playerData);
   }
 };
 
@@ -294,25 +300,21 @@ const getPlayerLadderSummary = async (mode, player) => {
  * @returns {Promise} Promise object representing player data including MMR.
  */
 const getPlayerMMR = async (mode, filter, player) => {
-  switch (filter.toUpperCase()) {
-    case 'SUM':
-      return getPlayerLadderSummary(mode, player);
-    default:
-      try {
-        const { server, id } = player;
-        const playerLadders = await getSc2PlayerData('ladders', player);
-        const filteredPlayerLadders = await filterLaddersByMode(playerLadders, mode);
-        const filteredLadderIds = await extractLadderIds(filteredPlayerLadders);
-        const uniqueFilteredLadderIds = await dedupeLadderIds(filteredLadderIds);
-        const extractedLadderObjects =
-          await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
-        const extractedPlayerData =
-          await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
-        const data = await filterPlayerObjectsByFilterType(extractedPlayerData, filter);
-        return data;
-      } catch (error) {
-        return error;
-      }
+  try {
+    const { server, id } = player;
+    const playerLadders = await getSc2PlayerData('ladders', player);
+    const filteredPlayerLadders = await filterLaddersByMode(playerLadders, mode);
+    const filteredLadderIds = await extractLadderIds(filteredPlayerLadders);
+    const uniqueFilteredLadderIds = await dedupeLadderIds(filteredLadderIds);
+    const extractedLadderObjects =
+      await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
+    const extractedPlayerData =
+      await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
+    const data = await prepareLadderSummary(extractedPlayerData, mode);
+    // filterPlayerObjectsByFilterType(extractedPlayerData, filter);
+    return data;
+  } catch (error) {
+    return error;
   }
 };
 
