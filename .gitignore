@@ -44,5 +44,8 @@ ssl/
 # Environment variables
 .env
 
+# Local database 
+db/
+
 # Test data folder
 __TESTDATA__

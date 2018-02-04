@@ -61,6 +61,9 @@ const getPlayerProfile = player => getSc2PlayerData('profile', player);
  */
 const filterLaddersByMode = async (ladderData, mode) => {
   const laddersToBeReturned = mode.toUpperCase();
+  const selectedModeIndex = sc2Config.matchMaking.modes.indexOf(laddersToBeReturned);
+  const selectedQueue = sc2Config.matchMaking.queues[selectedModeIndex];
+  const ladders = ladderData.currentSeason;
 
   if (!sc2Config.matchMaking.modes.includes(laddersToBeReturned)) {
     return {
@@ -68,12 +71,9 @@ const filterLaddersByMode = async (ladderData, mode) => {
     };
   }
 
-  const selectedModeIndex = sc2Config.matchMaking.modes.indexOf(laddersToBeReturned);
-  const selectedQueue = sc2Config.matchMaking.queues[selectedModeIndex];
-  const ladders = ladderData.currentSeason;
-  const filteredLadders = [];
-
   try {
+    const filteredLadders = [];
+
     if (ladderData.error) {
       return ladderData;
     }
