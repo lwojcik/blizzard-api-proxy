@@ -24,25 +24,19 @@ const getSc2PlayerData = async (resource, player) => {
       server, id, region, name // eslint-disable-line comma-dangle
     } = player;
 
-    const playerData = await new Promise((resolve, reject) => {
-      const serverUri = bnetConfig.api.url[server];
-      const requestedResource = (resource === 'profile') ? '' : resource;
-      const requestPath = `/sc2/profile/${id}/${region}/${name}/${requestedResource}`;
-      const requestUri = `${serverUri}${requestPath}`;
+    const serverUri = bnetConfig.api.url[server];
+    const requestedResource = (resource === 'profile') ? '' : resource;
+    const requestPath = `/sc2/profile/${id}/${region}/${name}/${requestedResource}`;
+    const requestUri = `${serverUri}${requestPath}`;
 
-      bnetApi.query(requestUri)
-        .then((data) => {
-          if (data.status === 'nok') {
-            resolve({
-              error: 'battlenet_api_error',
-              details: data,
-            });
-          } else {
-            resolve(data);
-          }
-        })
-        .catch(error => reject(error));
-    });
+    const playerData = await bnetApi.query(requestUri);
+
+    if (playerData.status === 'nok') {
+      return {
+        error: 'battlenet_api_error',
+        details: playerData,
+      };
+    }
 
     return playerData;
   } catch (error) {
@@ -56,14 +50,7 @@ const getSc2PlayerData = async (resource, player) => {
  * @param {Object} player - Player object including server, id, region and name.
  * @returns {Object} Player profile object.
  */
-const getPlayerProfile = async (player) => {
-  try {
-    const data = await getSc2PlayerData('profile', player);
-    return data;
-  } catch (error) {
-    return error;
-  }
-};
+const getPlayerProfile = player => getSc2PlayerData('profile', player);
 
 /**
  * Filters ladder data based on matchmaking mode.
@@ -72,7 +59,7 @@ const getPlayerProfile = async (player) => {
  * @param {object} ladderData - Ladder data object returned by Blizzard API.
  * @returns {Promise} Promise object representing ladders filtered by provided mode.
  */
-const filterLaddersByMode = (ladderData, mode) => {
+const filterLaddersByMode = async (ladderData, mode) => {
   const laddersToBeReturned = mode.toUpperCase();
 
   if (!sc2Config.matchMaking.modes.includes(laddersToBeReturned)) {
@@ -81,26 +68,29 @@ const filterLaddersByMode = (ladderData, mode) => {
     };
   }
 
-  return new Promise((resolve, reject) => {
-    const selectedModeIndex = sc2Config.matchMaking.modes.indexOf(laddersToBeReturned);
-    const selectedQueue = sc2Config.matchMaking.queues[selectedModeIndex];
-    const ladders = ladderData.currentSeason;
-    const filteredLadders = [];
+  const selectedModeIndex = sc2Config.matchMaking.modes.indexOf(laddersToBeReturned);
+  const selectedQueue = sc2Config.matchMaking.queues[selectedModeIndex];
+  const ladders = ladderData.currentSeason;
+  const filteredLadders = [];
 
+  try {
     if (ladderData.error) {
-      reject(ladderData);
-    } else {
-      ladders.forEach((ladderObject) => {
-        const ladder = ladderObject.ladder[0];
-        if (selectedQueue === 'ALL') {
-          filteredLadders.push(ladder);
-        } else if (ladder && ladder.matchMakingQueue === selectedQueue) {
-          filteredLadders.push(ladder);
-        }
-      });
-      resolve(filteredLadders.filter(Boolean));
+      return ladderData;
     }
-  });
+
+    ladders.forEach((ladderObject) => {
+      const ladder = ladderObject.ladder[0];
+      if (selectedQueue === 'ALL') {
+        filteredLadders.push(ladder);
+      } else if (ladder && ladder.matchMakingQueue === selectedQueue) {
+        filteredLadders.push(ladder);
+      }
+    });
+
+    return filteredLadders.filter(Boolean);
+  } catch (error) {
+    return error;
+  }
 };
 
 /**
@@ -119,26 +109,25 @@ const selectTopLadder = (ladderObjects) => {
  * @function
  * @param {string} mode - Player matchmaking mode (e.g. 1v1).
  * @param {Object} player - Player object including server, id, region and name.
- * @returns {Promise} Promise object representing player ladders.
+ * @returns {Object} Player ladders object.
  */
-const getPlayerLadders = (mode, player) => new Promise((resolve, reject) => {
-  getSc2PlayerData('ladders', player)
-    .then(ladders => filterLaddersByMode(ladders, mode))
-    .then(filteredLadders => resolve(filteredLadders))
-    .catch(error => reject(error));
-});
+const getPlayerLadders = async (mode, player) => {
+  try {
+    const ladders = await getSc2PlayerData('ladders', player);
+    const filteredLadders = await filterLaddersByMode(ladders, mode);
+    return filteredLadders;
+  } catch (error) {
+    return error;
+  }
+};
 
 /**
  * Fetches StarCraft 2 player match history.
  * @function
  * @param {Object} player - Player object including server, id, region and name.
- * @returns {Promise} Promise object representing player matches.
+ * @returns {Object} Player matches object.
  */
-const getPlayerMatches = player => new Promise((resolve, reject) => {
-  getSc2PlayerData('matches', player)
-    .then(data => resolve(data))
-    .catch(error => reject(error));
-});
+const getPlayerMatches = player => getSc2PlayerData('matches', player);
 
 /**
  * Extracts StarCraft 2 player data from ladder object.
@@ -155,15 +144,18 @@ const extractLadderIds = ladderData => ladderData.map(ladder => ladder.ladderId)
  * @param {Number} ladderId - ID of the ladder to fetch.
  * @returns {Promise} Promise object representing ladder data object.
  */
-const getLadderObjectById = (server, ladderId) => new Promise((resolve, reject) => {
-  ladderApi.getAuthenticatedLadderData(server, ladderId)
-    .then(authenticatedLadderData => resolve({
+const getLadderObjectById = async (server, ladderId) => {
+  try {
+    const authenticatedLadderData = await ladderApi.getAuthenticatedLadderData(server, ladderId);
+    return {
       ladderId,
       leagueInfo: authenticatedLadderData.league.league_key,
       data: authenticatedLadderData,
-    }))
-    .catch(error => reject(error));
-});
+    };
+  } catch (error) {
+    return error;
+  }
+};
 
 /**
  * Extracts array of ladder objects based on provided array of ladder ids.
@@ -220,19 +212,16 @@ const extractPlayerObjectsFromLadders = (ladderObjects, playerId) => {
  */
 const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
   const filterType = filter.toUpperCase();
-  let filteredPlayerObjects;
   switch (filterType) {
     case 'ALL':
-      filteredPlayerObjects = playerObjects;
-      break;
+      return playerObjects;
     case 'TOP':
-      filteredPlayerObjects = selectTopLadder(playerObjects);
-      break;
+      return selectTopLadder(playerObjects);
     default:
-      filteredPlayerObjects = { error: 'Wrong filter type provided (expected \'all\', \'top\' or \'sum\')' };
+      return {
+        error: 'Wrong filter type provided (expected \'all\', \'top\' or \'sum\')',
+      };
   }
-
-  return filteredPlayerObjects;
 };
 
 /**
@@ -281,21 +270,21 @@ const prepareLadderSummary = (playerData) => {
  * @param {Object} player - Player object including server, id, region and name.
  * @returns {Promise} Promise object representing player data including MMR.
  */
-const getPlayerLadderSummary = (mode, player) => new Promise((resolve, reject) => {
-  const { server, id } = player;
-
-  getSc2PlayerData('ladders', player)
-    .then(playerLadders => filterLaddersByMode(playerLadders, mode))
-    .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
-    .then(filteredLadderIds => dedupeLadderIds(filteredLadderIds))
-    .then(uniqueFilteredLadderIds =>
-      extractLadderObjectsByIds(server, uniqueFilteredLadderIds))
-    .then(extractedLadderObjects =>
-      extractPlayerObjectsFromLadders(extractedLadderObjects, id))
-    .then(extractedPlayerData => prepareLadderSummary(extractedPlayerData))
-    .then(data => resolve(data))
-    .catch(error => reject(error));
-});
+const getPlayerLadderSummary = async (mode, player) => {
+  try {
+    const { server, id } = player;
+    const playerLadders = await getSc2PlayerData('ladders', player);
+    const filteredPlayerLadders = await filterLaddersByMode(playerLadders, mode);
+    const filteredLadderIds = await extractLadderIds(filteredPlayerLadders);
+    const uniqueFilteredLadderIds = await dedupeLadderIds(filteredLadderIds);
+    const extractedLadderObjects = await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
+    const extractedPlayerData = await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
+    const data = await prepareLadderSummary(extractedPlayerData);
+    return data;
+  } catch (error) {
+    return error;
+  }
+};
 
 /**
  * Fetches StarCraft 2 player ladder data including MMR.
@@ -307,29 +296,25 @@ const getPlayerLadderSummary = (mode, player) => new Promise((resolve, reject) =
  * @returns {Promise} Promise object representing player data including MMR.
  */
 const getPlayerMMR = async (mode, filter, player) => {
-  const { server, id } = player;
-
   switch (filter.toUpperCase()) {
     case 'SUM':
-      return new Promise((resolve, reject) => {
-        getPlayerLadderSummary(mode, player)
-          .then(data => resolve(data))
-          .catch(error => reject(error));
-      });
+      return getPlayerLadderSummary(mode, player);
     default:
-      return new Promise((resolve, reject) => {
-        getSc2PlayerData('ladders', player)
-          .then(playerLadders => filterLaddersByMode(playerLadders, mode))
-          .then(filteredPlayerLadders => extractLadderIds(filteredPlayerLadders))
-          .then(filteredLadderIds => dedupeLadderIds(filteredLadderIds))
-          .then(uniqueFilteredLadderIds =>
-            extractLadderObjectsByIds(server, uniqueFilteredLadderIds))
-          .then(extractedLadderObjects =>
-            extractPlayerObjectsFromLadders(extractedLadderObjects, id))
-          .then(extractedPlayerData => filterPlayerObjectsByFilterType(extractedPlayerData, filter))
-          .then(data => resolve(data))
-          .catch(error => reject(error));
-      });
+      try {
+        const { server, id } = player;
+        const playerLadders = await getSc2PlayerData('ladders', player);
+        const filteredPlayerLadders = await filterLaddersByMode(playerLadders, mode);
+        const filteredLadderIds = await extractLadderIds(filteredPlayerLadders);
+        const uniqueFilteredLadderIds = await dedupeLadderIds(filteredLadderIds);
+        const extractedLadderObjects =
+          await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
+        const extractedPlayerData =
+          await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
+        const data = await filterPlayerObjectsByFilterType(extractedPlayerData, filter);
+        return data;
+      } catch (error) {
+        return error;
+      }
   }
 };
 

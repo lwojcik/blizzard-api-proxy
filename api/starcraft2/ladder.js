@@ -15,21 +15,18 @@ const bnetApi = require('../../api/battlenet');
  * @param {number} ladderId - Ladder identifier.
  * @returns {Promise} Promise object representing ladder data.
  */
-const getLadderData = (server, ladderId) => {
+const getLadderData = async (server, ladderId) => {
   if (!bnetConfig.servers.includes(server)) {
     return {
       error: `Wrong server (you provided: ${server}, available choices: ${bnetConfig.servers.join(', ')})`,
     };
   }
 
-  return new Promise((resolve, reject) => {
-    const requestServer = bnetConfig.api.url[server];
-    const requestUri = `${requestServer}/sc2/ladder/${ladderId}`;
+  const requestServer = bnetConfig.api.url[server];
+  const requestUri = `${requestServer}/sc2/ladder/${ladderId}`;
 
-    bnetApi.query(requestUri)
-      .then(ladderData => resolve(ladderData))
-      .catch(error => reject(error));
-  });
+  const ladderData = await bnetApi.query(requestUri);
+  return ladderData;
 };
 
 /**
@@ -39,19 +36,17 @@ const getLadderData = (server, ladderId) => {
  * @param {number} ladderId - Ladder identifier.
  * @returns {Promise} Promise object representing ladder data from an authenticated endpoint.
  */
-const getAuthenticatedLadderData = (server, ladderId) => {
+const getAuthenticatedLadderData = async (server, ladderId) => {
   if (!bnetConfig.servers.includes(server)) {
     return {
       error: `Wrong server (you provided: ${server}, available choices: ${bnetConfig.servers.join(', ')})`,
     };
   }
-  return new Promise((resolve, reject) => {
-    const requestUri = `/data/sc2/ladder/${ladderId}`;
 
-    bnetApi.queryWithAccessToken(server, requestUri)
-      .then(ladderData => resolve(ladderData))
-      .catch(error => reject(error));
-  });
+  const requestUri = `/data/sc2/ladder/${ladderId}`;
+  const ladderData = await bnetApi.queryWithAccessToken(server, requestUri);
+
+  return ladderData;
 };
 
 module.exports = {
