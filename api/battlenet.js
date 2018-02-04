@@ -6,7 +6,11 @@
  */
 
 const fetch = require('node-fetch');
+const diskdb = require('diskdb');
+
 const bnetConfig = require('../config/api/battlenet');
+
+const db = diskdb.connect('./db', ['accessToken']);
 
 /**
  * General method for fetching data from selected Battle.net endpoint.
@@ -18,6 +22,33 @@ const query = async (requestUri) => {
   try {
     const data = await fetch(`${requestUri}?apikey=${bnetConfig.api.key}`);
     return data.json();
+  } catch (error) {
+    return error;
+  }
+};
+
+/**
+ * Returns cached token object from file system.
+ * @function
+ * @param {string} server - Battle.net API server to request data from.
+ * @returns {Promise} Promise object representing access token object fetched from Battle.net API.
+ */
+const getAccessTokenObjectFromLocalDb = () => {
+  try {
+    const data = db.loadCollections(['accessToken']);
+    return data.accessToken.findOne();
+  } catch (error) {
+    return error;
+  }
+};
+
+
+const updateCachedAccessToken = (accessToken) => {
+  try {
+    const data = db.loadCollections(['accessToken']);
+    data.accessToken.remove({ token_type: 'bearer' }, true);
+    data.accessToken.update({}, accessToken, { upsert: true });
+    return accessToken;
   } catch (error) {
     return error;
   }
@@ -44,8 +75,20 @@ const getAccessTokenObjectFromBattleNet = async (server) => {
   }
 };
 
-const getAccessTokenObject = server => getAccessTokenObjectFromBattleNet(server);
+const getAccessTokenObject = async (server) => {
+  const cachedAccessToken = getAccessTokenObjectFromLocalDb();
 
+  if (cachedAccessToken === undefined) {
+    try {
+      const accessToken = await getAccessTokenObjectFromBattleNet(server);
+      return updateCachedAccessToken(accessToken);
+    } catch (error) {
+      return error;
+    }
+  }
+
+  return cachedAccessToken;
+};
 /**
  * Fetches data from Battle.net API using provided access token.
  * @function
@@ -77,6 +120,14 @@ const queryWithAccessToken = async (server, requestPath) => {
     const authenticatedRequestPath = `${authenticatedRequestUri}${requestPath}`;
 
     const data = await getDataWithAccessToken(accessToken, authenticatedRequestPath);
+
+    if (data.code === 403) {
+      const newAccessTokenObject = await getAccessTokenObjectFromBattleNet(server);
+      const updatedCachedAccessToken = updateCachedAccessToken(newAccessTokenObject);
+      const newAccessToken = updatedCachedAccessToken.access_token;
+      const newData = await getDataWithAccessToken(newAccessToken, authenticatedRequestPath);
+      return newData;
+    }
 
     return data;
   } catch (error) {
