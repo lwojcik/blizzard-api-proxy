@@ -233,13 +233,7 @@ const filterPlayerObjectsByFilterType = (playerObjects, filter) => {
  */
 const dedupeLadderIds = ladderIds => Array.from(new Set(ladderIds));
 
-/**
- * Return ladder summary based on provided ladder data
- * @function
- * @param {Array} playerData - Player data object.
- * @returns {Object} Ladder summary object.
- */
-const prepareLadderSummary = (playerData) => {
+const prepareSingleLadderSummary = (playerData) => {
   const ladderSummaryObject = {
     totalLadders: 0,
     topMMR: 0,
@@ -259,6 +253,26 @@ const prepareLadderSummary = (playerData) => {
   });
 
   return ladderSummaryObject;
+};
+
+const prepareAllLaddersSummary = (playerData) => {
+  const allLadders = [201, 206, 202, 203, 204]; // via https://us.battle.net/forums/en/sc2/topic/20749724960
+
+  const unprocessedLadderData = [];
+  const allLaddersData = [];
+  // let counter = 0;
+  allLadders.forEach(ladderCode =>
+    unprocessedLadderData
+      .push(playerData.map(playerDataObject => // eslint-disable-line no-confusing-arrow
+        playerDataObject.leagueInfo.queue_id === ladderCode ? playerDataObject : null)));
+
+  unprocessedLadderData.forEach((ladderDataObject) => {
+    const singleLadderSummary = prepareSingleLadderSummary(ladderDataObject);
+    allLaddersData.push(singleLadderSummary);
+    // counter += 1;
+  });
+
+  return allLaddersData;
 };
 
 /**
@@ -281,7 +295,7 @@ const getPlayerMMR = async (mode, filter, player) => {
       await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
     const extractedPlayerData = await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
     const data = (filter.toUpperCase() === 'SUM') ?
-      await prepareLadderSummary(extractedPlayerData) :
+      await prepareAllLaddersSummary(extractedPlayerData) :
       await filterPlayerObjectsByFilterType(extractedPlayerData, filter);
     return data;
   } catch (error) {

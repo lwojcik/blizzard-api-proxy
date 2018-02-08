@@ -55,6 +55,7 @@ router.get('/', apicache(cache.static), (req, res) => {
 /** Route for MMR from selected player ladder */
 router.get(`/:mode/:filter/${playerPath}`, apicache(cache.request), (req, res) => {
   const { mode, filter } = req.params;
+
   if (mode.toUpperCase() === 'ALL' && filter.toUpperCase() === 'SUM') {
     sc2playerApi.getPlayerAllLaddersSummary(mode, req.params)
       .then(data => res.json(data))
