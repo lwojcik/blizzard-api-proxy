@@ -57,7 +57,7 @@ router.get(`/:mode/:filter/${playerPath}`, apicache(cache.request), (req, res) =
   const { mode, filter } = req.params;
 
   if (mode.toUpperCase() === 'ALL' && filter.toUpperCase() === 'SUM') {
-    sc2playerApi.getPlayerAllLaddersSummary(mode, req.params)
+    sc2playerApi.getPlayerAllLaddersSummary(req.params)
       .then(data => res.json(data))
       .catch(error => res.json(error));
   } else {
