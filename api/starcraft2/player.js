@@ -255,26 +255,6 @@ const prepareSingleLadderSummary = (playerData) => {
   return ladderSummaryObject;
 };
 
-const prepareAllLaddersSummary = (playerData) => {
-  const allLadders = [201, 206, 202, 203, 204]; // via https://us.battle.net/forums/en/sc2/topic/20749724960
-
-  const unprocessedLadderData = [];
-  const allLaddersData = [];
-  // let counter = 0;
-  allLadders.forEach(ladderCode =>
-    unprocessedLadderData
-      .push(playerData.map(playerDataObject => // eslint-disable-line no-confusing-arrow
-        playerDataObject.leagueInfo.queue_id === ladderCode ? playerDataObject : null)));
-
-  unprocessedLadderData.forEach((ladderDataObject) => {
-    const singleLadderSummary = prepareSingleLadderSummary(ladderDataObject);
-    allLaddersData.push(singleLadderSummary);
-    // counter += 1;
-  });
-
-  return allLaddersData;
-};
-
 /**
  * Fetches StarCraft 2 player ladder data including MMR.
  * @function
@@ -295,7 +275,7 @@ const getPlayerMMR = async (mode, filter, player) => {
       await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
     const extractedPlayerData = await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
     const data = (filter.toUpperCase() === 'SUM') ?
-      await prepareAllLaddersSummary(extractedPlayerData) :
+      await prepareSingleLadderSummary(extractedPlayerData) :
       await filterPlayerObjectsByFilterType(extractedPlayerData, filter);
     return data;
   } catch (error) {
@@ -310,7 +290,7 @@ const getPlayerMMR = async (mode, filter, player) => {
  * @param {Object} player - Player object including server, id, region and name.
  * @returns {Promise} Promise object representing player data including MMR.
  */
-const getPlayerAllLaddersSummary = async (mode, player) => { // eslint-disable-line arrow-body-style
+const getPlayerAllLaddersSummary = async (player) => { // eslint-disable-line arrow-body-style
   return {
     '1v1': await getPlayerMMR('1v1', 'SUM', player),
     archon: await getPlayerMMR('archon', 'SUM', player),
