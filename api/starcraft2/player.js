@@ -262,29 +262,6 @@ const prepareLadderSummary = (playerData) => {
 };
 
 /**
- * Returns the summary of player ladders.
- * @function
- * @param {string} mode - Player matchmaking mode (e.g. 1v1).
- * @param {Object} player - Player object including server, id, region and name.
- * @returns {Promise} Promise object representing player data including MMR.
- */
-const getPlayerLadderSummary = async (mode, player) => {
-  try {
-    const { server, id } = player;
-    const playerLadders = await getSc2PlayerData('ladders', player);
-    const filteredPlayerLadders = await filterLaddersByMode(playerLadders, mode);
-    const filteredLadderIds = await extractLadderIds(filteredPlayerLadders);
-    const uniqueFilteredLadderIds = await dedupeLadderIds(filteredLadderIds);
-    const extractedLadderObjects = await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
-    const extractedPlayerData = await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
-    const data = await prepareLadderSummary(extractedPlayerData);
-    return data;
-  } catch (error) {
-    return error;
-  }
-};
-
-/**
  * Fetches StarCraft 2 player ladder data including MMR.
  * @function
  * @param {string} mode - Player matchmaking mode (e.g. 1v1).
@@ -294,26 +271,39 @@ const getPlayerLadderSummary = async (mode, player) => {
  * @returns {Promise} Promise object representing player data including MMR.
  */
 const getPlayerMMR = async (mode, filter, player) => {
-  switch (filter.toUpperCase()) {
-    case 'SUM':
-      return getPlayerLadderSummary(mode, player);
-    default:
-      try {
-        const { server, id } = player;
-        const playerLadders = await getSc2PlayerData('ladders', player);
-        const filteredPlayerLadders = await filterLaddersByMode(playerLadders, mode);
-        const filteredLadderIds = await extractLadderIds(filteredPlayerLadders);
-        const uniqueFilteredLadderIds = await dedupeLadderIds(filteredLadderIds);
-        const extractedLadderObjects =
-          await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
-        const extractedPlayerData =
-          await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
-        const data = await filterPlayerObjectsByFilterType(extractedPlayerData, filter);
-        return data;
-      } catch (error) {
-        return error;
-      }
+  try {
+    const { server, id } = player;
+    const playerLadders = await getSc2PlayerData('ladders', player);
+    const filteredPlayerLadders = await filterLaddersByMode(playerLadders, mode);
+    const filteredLadderIds = await extractLadderIds(filteredPlayerLadders);
+    const uniqueFilteredLadderIds = await dedupeLadderIds(filteredLadderIds);
+    const extractedLadderObjects =
+      await extractLadderObjectsByIds(server, uniqueFilteredLadderIds);
+    const extractedPlayerData = await extractPlayerObjectsFromLadders(extractedLadderObjects, id);
+    const data = (filter.toUpperCase() === 'SUM') ?
+      await prepareLadderSummary(extractedPlayerData) :
+      await filterPlayerObjectsByFilterType(extractedPlayerData, filter);
+    return data;
+  } catch (error) {
+    return error;
   }
+};
+
+/**
+ * Returns the summary of player ladders.
+ * @function
+ * @param {string} mode - Player matchmaking mode (e.g. 1v1).
+ * @param {Object} player - Player object including server, id, region and name.
+ * @returns {Promise} Promise object representing player data including MMR.
+ */
+const getPlayerAllLaddersSummary = async (mode, player) => { // eslint-disable-line arrow-body-style
+  return {
+    '1v1': await getPlayerMMR('1v1', 'SUM', player),
+    archon: await getPlayerMMR('archon', 'SUM', player),
+    '2v2': await getPlayerMMR('2v2', 'SUM', player),
+    '3v3': await getPlayerMMR('3v3', 'SUM', player),
+    '4v4': await getPlayerMMR('4v4', 'SUM', player),
+  };
 };
 
 module.exports = {
@@ -321,4 +311,5 @@ module.exports = {
   getPlayerLadders,
   getPlayerMatches,
   getPlayerMMR,
+  getPlayerAllLaddersSummary,
 };

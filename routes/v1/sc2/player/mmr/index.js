@@ -21,7 +21,7 @@ router.get('/', apicache(cache.static), (req, res) => {
       all_modes: {
         top_ladder: `${config.siteUrl}/${routePath}/all/top/${playerPath}`,
         all_ladders: `${config.siteUrl}/${routePath}/all/all/${playerPath}`,
-        // ladder_summary: `${config.siteUrl}/${routePath}/all/sum/${playerPath}`,
+        all_ladders_summary: `${config.siteUrl}/${routePath}/all/sum/${playerPath}`,
       },
       '1v1': {
         top_ladder: `${config.siteUrl}/${routePath}/1v1/top/${playerPath}`,
@@ -56,7 +56,9 @@ router.get('/', apicache(cache.static), (req, res) => {
 router.get(`/:mode/:filter/${playerPath}`, apicache(cache.request), (req, res) => {
   const { mode, filter } = req.params;
   if (mode.toUpperCase() === 'ALL' && filter.toUpperCase() === 'SUM') {
-    res.json({ error: 'That filter and mode combo is not supported yet. Use a game mode (e.g. 1v1) with \'SUM\'' });
+    sc2playerApi.getPlayerAllLaddersSummary(mode, req.params)
+      .then(data => res.json(data))
+      .catch(error => res.json(error));
   } else {
     sc2playerApi.getPlayerMMR(mode, filter, req.params)
       .then(data => res.json(data))
