@@ -236,6 +236,8 @@ const dedupeLadderIds = ladderIds => Array.from(new Set(ladderIds));
 const prepareSingleLadderSummary = (playerData) => {
   const ladderSummaryObject = {
     totalLadders: 0,
+    topRankId: -1,
+    topRank: '',
     topMMR: 0,
     wins: 0,
     losses: 0,
@@ -244,6 +246,11 @@ const prepareSingleLadderSummary = (playerData) => {
 
   playerData.forEach((ladderObject) => {
     ladderSummaryObject.totalLadders += 1;
+    ladderSummaryObject.topRankId =
+      ladderObject.leagueInfo.league_id > ladderSummaryObject.topRank ?
+        ladderObject.leagueInfo.league_id :
+        ladderSummaryObject.topRankId;
+    ladderSummaryObject.topRank = sc2Config.matchMaking.ranks[ladderSummaryObject.topRankId];
     ladderSummaryObject.topMMR =
       ladderObject.data.rating > ladderSummaryObject.topMMR ?
         ladderObject.data.rating : ladderSummaryObject.topMMR;
