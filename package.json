@@ -23,7 +23,7 @@
     "body-parser": "1.18.2",
     "compression": "1.7.2",
     "diskdb": "0.1.17",
-    "dotenv": "5.0.0",
+    "dotenv": "5.0.1",
     "express": "4.16.2",
     "helmet": "3.11.0",
     "node-fetch": "2.0.0"
