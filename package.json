@@ -20,7 +20,7 @@
   "dependencies": {
     "apicache": "1.2.1",
     "await-fs": "1.0.0",
-    "body-parser": "1.18.2",
+    "body-parser": "1.18.3",
     "compression": "1.7.2",
     "diskdb": "0.1.17",
     "dotenv": "5.0.1",
