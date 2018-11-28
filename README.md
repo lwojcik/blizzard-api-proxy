@@ -1,10 +1,10 @@
 # Blizzard API Proxy App
 
+**As of October 2018 the project is not maintained any more.**
+
 Node.js wrapper to Battle.net API and selected Blizzard games.
 Handling endpoint access, authentication, caching and some data manipulation procedures
 so that other apps of mine don't have to handle that themselves.
-
-As of October 2018 the project is not maintained any more.
 
 ## Requirements
 
@@ -26,13 +26,6 @@ with API key and API secret you had obtained from Battle.net.
 * StarCraft II data retrieval:
   * Ladder data
   * Player ranked matchmaking stats including MMR
-
-## To do
-
-* ~~Proper documentation :)~~ Turning it into npm library with proper docs and examples of usage
-* Key-based authentication (e.g. parsing Blizzard API key provided via URL parameter)
-* ~~Caching access token locally to cut the number of requests to Battle.net API~~
-* Basic test coverage
 
 ## License
 
